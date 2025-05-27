@@ -29,6 +29,12 @@ Complete the Cloud Resume Challenge to land my first cloud engineering job!
 - Customized `hugo.toml` with personal and professional branding
 - Successfully tested site locally at `localhost:1313` with responsive layout and working sections
 
+### 🔹 [Day 3 – Production Build & S3 Deployment](./daily-logs/day3.md)
+- Ran `hugo --minify` to generate optimized production-ready static files
+- Fixed `baseURL` in `config.toml` to match deployed S3 endpoint
+- Verified correct HTML, CSS, JS asset generation in `public/` folder
+- Uploaded build to S3 bucket configured for static website hosting
+- Successfully opened live resume site via S3 public URL with styling intact
 
 ---
 
