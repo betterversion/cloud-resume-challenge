@@ -91,7 +91,7 @@ Complete the Cloud Resume Challenge to land my first cloud engineering job!
 - [ ] Infrastructure fully defined as code
 - [ ] CI/CD pipeline automated
 
-### Technical Skills
+### Technical Skillsc
 - [x] AWS SSO & Organizations
 - [ ] S3 static hosting
 - [ ] CloudFront CDN
