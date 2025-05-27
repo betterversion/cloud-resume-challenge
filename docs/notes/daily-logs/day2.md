@@ -1,6 +1,3 @@
-Here you go — one clean, copy-ready markdown block for `daily-logs/day2.md`:
-
-````markdown
 # 🎨 Day 2: Hugo Static Resume – Professional Frontend Architecture
 
 ## 🎯 Objective
@@ -71,4 +68,3 @@ Build a clean, modular frontend for the Cloud Resume Challenge using **Hugo**, a
 * Using submodules for themes maintains separation of concerns
 * JSON-based resume structuring scales better than hardcoded content
 * Clean local preview and testing lays the foundation for AWS hosting
-````
