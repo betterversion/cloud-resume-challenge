@@ -1,0 +1,31 @@
+# Modern Hugo configuration for professional resume
+baseURL = 'http://localhost:1313'
+languageCode = 'en-us'
+title = 'Dmitriy Zhernoviy - Cloud Engineer'
+theme = 'hugo-resume'
+
+# Professional contact information
+[params]
+  firstName = 'Dmitriy'
+  lastName = 'Zhernoviy'
+  address = 'Denver, CO'
+  phone = '503-660-3010'
+  email = 'dmitriy.z.tech@gmail.com'
+
+  # Professional elevator pitch
+  description = 'Legal professional transitioning to cloud engineering with AWS SAA-C03 certification and passion for automation'
+
+  # Professional networking links
+  # linkedin = 'your-linkedin-profile' (coming soon)
+  github = 'betterversion'
+
+  # Site optimization
+  favicon = '/favicon.ico'
+
+  # Professional features
+  showQRCode = false
+  showSkills = true
+  showEducation = true
+  showExperience = true
+  showOpenSource = true
+  showProjects = true
