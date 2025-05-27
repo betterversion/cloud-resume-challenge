@@ -22,13 +22,21 @@ Complete the Cloud Resume Challenge to land my first cloud engineering job!
 - Implemented cost tagging, budgets, and alerts
 - Installed local tooling and initialized Hugo project + GitHub repo
 
+### 🔹 [Day 2 – Repository Structure & Hugo Resume Integration](./daily-logs/day2.md)
+- Created `frontend/hugo` project directory with clean modular structure
+- Initialized Hugo site and added `hugo-resume` theme via Git submodule
+- Structured resume data via JSON files (skills, experience, education, certifications)
+- Customized `hugo.toml` with personal and professional branding
+- Successfully tested site locally at `localhost:1313` with responsive layout and working sections
+
+
 ---
 
 ## 📋 Current Week Progress
 
 ### Week 1: Foundation & Frontend (Days 1-7)
 - [x] Day 1: AWS Organization & Environment Setup ✅
-- [ ] Day 2: Repository structure & convert resume to Hugo format
+- [x] Day 2: Repository structure & convert resume to Hugo format
 - [ ] Day 3: Deploy resume to S3 with static website hosting
 - [ ] Day 4: Enable HTTPS with CloudFront CDN
 - [ ] Day 5: Setup custom domain with Route 53
