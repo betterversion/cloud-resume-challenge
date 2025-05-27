@@ -3,6 +3,7 @@ baseURL = 'http://localhost:1313'
 languageCode = 'en-us'
 title = 'Dmitriy Zhernoviy - Cloud Engineer'
 theme = 'hugo-resume'
+enableGitInfo = true
 
 # Professional contact information
 [params]
@@ -11,6 +12,7 @@ theme = 'hugo-resume'
   address = 'Denver, CO'
   phone = '503-660-3010'
   email = 'dmitriy.z.tech@gmail.com'
+  profileImage = "img/profile.jpg"
 
   # Professional elevator pitch
   description = 'Legal professional transitioning to cloud engineering with AWS SAA-C03 certification and passion for automation'
@@ -23,9 +25,25 @@ theme = 'hugo-resume'
   favicon = '/favicon.ico'
 
   # Professional features
-  showQRCode = false
+  showQRCode = true
+  showContact = true
+  showSummary = true
   showSkills = true
   showEducation = true
   showExperience = true
   showOpenSource = true
   showProjects = true
+  showCertifications = true
+  showSocializations = true
+  sections = ["skills","experience","education"]
+  devicons = ["selenium", "postman", "aws", "docker", "jenkins", "ansible"]
+
+[[params.handles]]
+name = "LinkedIn"
+link = "#" # Add your actual LinkedIn URL
+icon = "linkedin"
+
+[[params.handles]]
+name = "GitHub"
+link = "https://github.com/betterversion" # Add your GitHub URL
+icon = "github"

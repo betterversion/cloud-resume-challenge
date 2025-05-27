@@ -1,0 +1,20 @@
+[
+    {
+        "role": "SDET III (Infrastructure & DevOps Focus)",
+        "company": "Zillow",
+        "range": "2021.10 - 2025.02",
+        "summary": "**Cloud Infrastructure & Migration**\n- Modernized legacy .NET systems to AWS cloud-native architecture, maintaining 99.95% uptime for 2M+ transactions/mo\n- Containerized test environments using Docker (8h → 20m provisioning)\n- Designed self-healing infrastructure with Ansible automation\n\n**CI/CD Pipeline Architecture**\n- Architected enterprise CI/CD framework (TeamCity/Ansible) adopted by 7 teams\n- Reduced pipeline setup time from days → hours via reusable templates\n- Implemented parallel test execution (60m → 36m runtime)\n- Automated 90% of test data management workflows\n\n**Developer Enablement & SRE**\n- Built self-service tools reducing developer dependencies by 70%\n- Created Grafana/ELK monitoring for 50+ API endpoints\n- Developed PowerShell utilities for health checks\n\n**Leadership & Optimization**\n- Mentored 5 engineers in infrastructure-as-code practices\n- Led AWS migration cutting environment costs by 40%\n- Reduced production incidents by 65% post-migration"
+      },
+      {
+        "role": "QA Automation Engineer",
+        "company": "ShowingTime",
+        "range": "2018.08 - 2021.10",
+        "summary": "**Test Automation**\n- Built Selenium WebDriver framework with 75% lower maintenance\n- Automated 150+ API scenarios with RestSharp/.NET\n- Slashed regression time from 2h → 25m\n\n**Process Leadership**\n- Managed CI/CD pipelines (Jenkins/AWS)\n- Created PowerShell scripts for bug tracking\n- Introduced end-to-end testing workflows\n\n**Team Scaling**\n- Led 8-10 projects/release with offshore teams\n- Improved dev/test collaboration through process changes"
+      },
+      {
+        "role": "QA Analyst",
+        "company": "Infomatrix Global",
+        "range": "2016.05 - 2018.07",
+        "summary": "**Testing Foundations**\n- Reduced iteration windows from 2 weeks → 6-7 days via smoke testing\n- Executed 1000+ test cases across functional/mobile/performance\n- Bridged communication between engineering and stakeholders"
+      }
+    ]
