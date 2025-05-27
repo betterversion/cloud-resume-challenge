@@ -36,6 +36,15 @@ Complete the Cloud Resume Challenge to land my first cloud engineering job!
 - Uploaded build to S3 bucket configured for static website hosting
 - Successfully opened live resume site via S3 public URL with styling intact
 
+### 🔹 [Day 4 – CloudFront CDN with SSL & Custom Domain](./daily-logs/day4.md)
+
+* Requested a public SSL certificate in ACM (us-east-1) for `dzresume.dev` and `www.dzresume.dev`
+* Validated certificate via DNS using Cloudflare-managed CNAME records
+* Created CloudFront distribution with static S3 website origin
+* Configured HTTPS redirect, custom domain aliases, and attached ACM certificate
+* Verified site delivery via `https://www.dzresume.dev` with working styles and HTTPS lock
+* Implemented origin access control (OAC) with S3 bucket policy and blocked direct S3 access
+
 ---
 
 ## 📋 Current Week Progress
@@ -43,7 +52,7 @@ Complete the Cloud Resume Challenge to land my first cloud engineering job!
 ### Week 1: Foundation & Frontend (Days 1-7)
 - [x] Day 1: AWS Organization & Environment Setup ✅
 - [x] Day 2: Repository structure & convert resume to Hugo format
-- [ ] Day 3: Deploy resume to S3 with static website hosting
+- [x] Day 3: Deploy resume to S3 with static website hosting
 - [ ] Day 4: Enable HTTPS with CloudFront CDN
 - [ ] Day 5: Setup custom domain with Route 53
 - [ ] Day 6: Polish frontend & responsive design

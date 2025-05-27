@@ -1,5 +1,5 @@
 # Modern Hugo configuration for professional resume
-baseURL = "http://dzresume.dev.s3-website-us-east-1.amazonaws.com/"
+baseURL = "https://dzresume.dev/"
 languageCode = 'en-us'
 title = 'Dmitriy Zhernoviy - Cloud Engineer'
 theme = 'hugo-resume'
