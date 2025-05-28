@@ -63,13 +63,17 @@ Establish a professional multi-account AWS architecture with centralized identit
 
 ---
 
-## 🔐 Phase 5: Security Hardening & Operational Readiness
+## 🔐 Phase 5: Security Hardening, Cost Guardrails & Operational Readiness
 
 * Verified **MFA enforced** for root and SSO identities
-* No long-term access keys created
-* All CLI usage routed through temporary credentials with session expiration
+* Ensured **no long-term access keys** are in use
+* All CLI usage routed through **temporary credentials** with session expiration
 * Verified account switching via CLI with SSO profile config
-* CloudTrail logging defaulted; GuardDuty planned for later
+* Implemented **Service Control Policies (SCPs)** at Org level:
+  * Denied **all RDS actions** in Dev account
+  * Denied all EC2 launches **except** Free Tier (`t2.micro`, `t3.micro`)
+  * Validated SCP enforcement using both **CLI (`aws ec2 run-instances`)** and **Console**
+* Established strong cost governance posture through **budget-aware security controls**
 
 ---
 
