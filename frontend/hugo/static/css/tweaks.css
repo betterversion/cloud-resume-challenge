@@ -1,0 +1,247 @@
+/* Base visitor counter styling that matches your theme */
+.visitor-badge {
+    padding: 2px 0;
+    border-left: 2px solid #bd5d38;
+    padding-left: 8px;
+    margin-left: 0;
+    background: transparent;
+}
+
+/* Enhanced loading animation for better visibility and timing */
+.count-loading {
+    /* Slightly faster cycle to fit more cleanly into loading window */
+    animation: enhanced-pulse 0.8s ease-in-out infinite;
+    opacity: 0.8;
+    color: #bd5d38 !important;
+    background-color: rgba(189, 93, 56, 0.05);
+    padding: 2px 6px;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+}
+
+/* Much smoother loaded state transition */
+.count-loaded {
+    /* Longer, gentler transition that feels natural */
+    animation: gentle-materialize 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    opacity: 1;
+    background-color: transparent;
+    padding: 0;
+}
+
+/* Error state for when API calls fail */
+.count-error {
+    opacity: 0.5;
+    color: #6c757d !important;
+    background-color: transparent;
+    padding: 0;
+}
+
+/* Enhanced pulse with better timing */
+@keyframes enhanced-pulse {
+    0% {
+        opacity: 0.8;
+        transform: scale(1);
+        background-color: rgba(189, 93, 56, 0.05);
+    }
+
+    50% {
+        opacity: 0.4;
+        transform: scale(1.08);
+        background-color: rgba(189, 93, 56, 0.12);
+    }
+
+    100% {
+        opacity: 0.8;
+        transform: scale(1);
+        background-color: rgba(189, 93, 56, 0.05);
+    }
+}
+
+/* Smooth, natural materialization effect instead of abrupt fade */
+@keyframes gentle-materialize {
+    0% {
+        opacity: 0.4;
+        transform: translateY(-1px) scale(0.95);
+    }
+
+    30% {
+        opacity: 0.7;
+        transform: translateY(0.5px) scale(1.02);
+    }
+
+    60% {
+        opacity: 0.9;
+        transform: translateY(0) scale(0.99);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Professional content width controls for better desktop readability */
+.resume-section {
+    /* Limit content width for optimal reading experience */
+    max-width: 800px;
+    /* Center the content horizontally */
+    margin-left: auto;
+    margin-right: auto;
+    /* Maintain existing padding for mobile compatibility */
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+}
+
+/* Specific adjustments for the about section header area */
+.resume-section#about .resume-item {
+    /* Slightly wider for the header section to accommodate name and contact info */
+    max-width: 900px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Enhanced typography for better reading experience */
+.resume-section p {
+    /* Improve line height for better readability */
+    line-height: 1.6;
+    /* Add subtle margin between paragraphs */
+    margin-bottom: 1rem;
+}
+
+/* Improve list formatting for experience bullets */
+.resume-section ul li {
+    /* Better line height for bulleted content */
+    line-height: 1.5;
+    /* Add space between list items */
+    margin-bottom: 0.5rem;
+}
+
+/* Responsive adjustments for different screen sizes */
+@media (max-width: 992px) {
+    .resume-section {
+        /* Allow more width on tablets */
+        max-width: 100%;
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .resume-section {
+        /* Full width on mobile devices */
+        max-width: 100%;
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
+    }
+}
+
+/* Enhanced Sidebar Styling for Professional Polish */
+
+/* Improve sidebar navigation typography and spacing */
+#sideNav .navbar-nav .nav-item {
+    margin: 0.3rem 0;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+/* Enhanced navigation link styling */
+#sideNav .navbar-nav .nav-link {
+    /* Better typography */
+    font-weight: 500;
+    font-size: 0.9rem;
+    letter-spacing: 0.5px;
+    padding: 0.8rem 1.5rem;
+    border-radius: 8px;
+    position: relative;
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+
+    /* Subtle text shadow for better readability */
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Elegant hover effects */
+#sideNav .navbar-nav .nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+    transform: translateX(4px);
+    padding-left: 2rem;
+
+    /* Subtle glow effect */
+    box-shadow: inset 3px 0 0 rgba(255, 255, 255, 0.4);
+}
+
+/* Active section indicator */
+#sideNav .navbar-nav .nav-link.active,
+#sideNav .navbar-nav .nav-link[aria-current="page"] {
+    background-color: rgba(255, 255, 255, 0.2);
+    font-weight: 600;
+    transform: translateX(6px);
+    padding-left: 2rem;
+
+    /* Active state indicator */
+    box-shadow: inset 4px 0 0 rgba(255, 255, 255, 0.6);
+}
+
+/* Enhanced profile image area */
+#sideNav .navbar-brand img {
+    transition: all 0.3s ease;
+    border: 3px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Subtle profile image hover effect */
+#sideNav .navbar-brand:hover img {
+    transform: scale(1.05);
+    border-color: rgba(255, 255, 255, 0.4);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+/* Better mobile menu button */
+#sideNav .navbar-toggler {
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 8px;
+    padding: 0.5rem 0.75rem;
+    transition: all 0.3s ease;
+}
+
+#sideNav .navbar-toggler:hover {
+    border-color: rgba(255, 255, 255, 0.6);
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Smooth sidebar background enhancement */
+#sideNav {
+    /* Add subtle texture */
+    background: linear-gradient(135deg, #bd5d38 0%, #a85230 100%);
+
+    /* Subtle shadow for depth */
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive improvements for better mobile experience */
+@media (max-width: 992px) {
+    #sideNav .navbar-nav .nav-link {
+        font-size: 1rem;
+        padding: 1rem 1.5rem;
+    }
+
+    #sideNav .navbar-nav .nav-link:hover,
+    #sideNav .navbar-nav .nav-link.active {
+        transform: none;
+        padding-left: 1.5rem;
+    }
+}
+
+/* Optional: Subtle scroll progress indicator */
+#sideNav::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100vh;
+    background: linear-gradient(to bottom,
+            rgba(255, 255, 255, 0.3) 0%,
+            rgba(255, 255, 255, 0.1) 100%);
+    z-index: 1000;
+    opacity: 0.7;
+}

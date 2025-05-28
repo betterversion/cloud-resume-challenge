@@ -1,0 +1,16 @@
+<!-- Enhanced SEO Meta Tags -->
+<meta name="keywords" content="Cloud Engineer, AWS, DevOps, Solutions Architect, DynamoDB, Lambda, {{ .Site.Params.firstName }} {{ .Site.Params.lastName }}">
+
+<!-- Additional Open Graph enhancements -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="{{ .Site.BaseURL }}">
+<meta property="og:site_name" content="{{ .Site.Title }}">
+
+<!-- Professional SEO -->
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="{{ .Permalink }}">
+
+<!-- Enhanced page-specific descriptions for different sections -->
+{{ if eq .Title "About" }}
+<meta name="description" content="{{ .Site.Params.firstName }} {{ .Site.Params.lastName }} - {{ .Site.Params.description }}">
+{{ end }}
