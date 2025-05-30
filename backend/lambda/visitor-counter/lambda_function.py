@@ -22,11 +22,13 @@ def lambda_handler(event, context):
         # Extract request metadata
         path = event.get('path', '/counter')
         http_method = event.get('httpMethod', 'GET')
+        cors_origin = get_cors_origin(event)  # 🔧 NEW: Use helper function
 
         logger.info(f"Processing request: {json.dumps({
             'requestId': context.aws_request_id,
             'path': path,
             'httpMethod': http_method,
+            'origin': cors_origin,
             'userAgent': event.get('headers', {}).get('User-Agent', 'UNKNOWN')[:100]
         })}")
 
@@ -35,15 +37,12 @@ def lambda_handler(event, context):
             health_data = health_check()
             status_code = 200 if health_data.get('status') == 'healthy' else 503
 
-            return {
-                'statusCode': status_code,
-                'headers': {
-                    'Content-Type': 'application/json',
-                    'Access-Control-Allow-Origin': 'https://www.dzresume.dev',
-                    'Cache-Control': 'no-cache, max-age=0'
-                },
-                'body': json.dumps(health_data)
-            }
+            return build_response(
+                status_code=status_code,
+                body=health_data,
+                cors_origin=cors_origin,
+                cache_control='no-cache, max-age=0'
+            )
 
         # 🔢 Visitor Counter Endpoint (default)
         try:
@@ -55,23 +54,20 @@ def lambda_handler(event, context):
             else:
                 raise e
 
-        return {
-            'statusCode': 200,
-            'headers': {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': 'https://www.dzresume.dev',
-                'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-                'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-                'Cache-Control': 'no-cache, no-store, must-revalidate',
-                'X-Content-Type-Options': 'nosniff'
-            },
-            'body': json.dumps({
-                'count': new_count,
-                'timestamp': datetime.now().isoformat(),
-                'status': 'success',
-                'requestId': context.aws_request_id
-            })
+        response_body = {
+            'count': new_count,
+            'timestamp': datetime.now().isoformat(),
+            'status': 'success',
+            'requestId': context.aws_request_id
         }
+
+        return build_response(
+            status_code=200,
+            body=response_body,
+            cors_origin=cors_origin,
+            cache_control='no-cache, no-store, must-revalidate',
+            extra_headers={'X-Content-Type-Options': 'nosniff'}
+        )
 
     except Exception as e:
         error_context = {
@@ -83,18 +79,63 @@ def lambda_handler(event, context):
 
         logger.error(f"Visitor counter operation failed: {json.dumps(error_context)}")
 
-        return {
-            'statusCode': 500,
-            'headers': {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': 'https://www.dzresume.dev'
-            },
-            'body': json.dumps({
-                'status': 'error',
-                'message': 'Unable to process request. Please try again.',
-                'requestId': context.aws_request_id
-            })
+        cors_origin = get_cors_origin(event)
+        error_body = {
+            'status': 'error',
+            'message': 'Unable to process request. Please try again.',
+            'requestId': context.aws_request_id
         }
+
+        return build_response(
+            status_code=500,
+            body=error_body,
+            cors_origin=cors_origin
+        )
+
+def get_cors_origin(event):
+    """
+    Determine appropriate CORS origin based on request
+    Allows both production and development origins
+    """
+    request_origin = event.get('headers', {}).get('origin', '')
+
+    allowed_origins = [
+        'https://www.dzresume.dev',
+        'https://dzresume.dev',
+        'http://localhost:1313',
+        'http://127.0.0.1:1313'
+    ]
+
+    if request_origin in allowed_origins:
+        logger.info(f"CORS: Allowing origin {request_origin}")
+        return request_origin
+
+    logger.info(f"CORS: Unknown origin {request_origin}, defaulting to production")
+    return 'https://www.dzresume.dev'
+
+
+def build_response(status_code, body, cors_origin, cache_control=None, extra_headers=None):
+    """
+    Build standardized API response with consistent headers
+    """
+    headers = {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': cors_origin,
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    }
+
+    if cache_control:
+        headers['Cache-Control'] = cache_control
+
+    if extra_headers:
+        headers.update(extra_headers)
+
+    return {
+        'statusCode': status_code,
+        'headers': headers,
+        'body': json.dumps(body)
+    }
 
 def increment_existing_counter():
     """Perform atomic increment of existing visitor counter"""

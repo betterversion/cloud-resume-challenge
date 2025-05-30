@@ -28,8 +28,7 @@ async function executeCounterUpdate(element) {
   // Record when we started the loading process
   const loadingStartTime = Date.now();
 
-  // Simulate API call (later this will be your actual Lambda API call)
-  const apiCallPromise = simulateApiCall();
+  const apiCallPromise = makeRealApiCall();
 
   // Create minimum timer promise
   const minimumTimerPromise = new Promise((resolve) => {
@@ -66,18 +65,40 @@ async function executeCounterUpdate(element) {
   }
 }
 
-function simulateApiCall() {
-  // Simulate variable API response times to test minimum loading behavior
-  const randomDelay = Math.random() * 800; // 0-800ms random delay
+async function makeRealApiCall() {
+  // Your actual API Gateway URL - replace with yours
+  const API_URL = "https://api.dzresume.dev/counter";
 
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      console.log(
-        `Simulated API call completed in ${Math.round(randomDelay)}ms`
-      );
-      resolve({ count: "01", timestamp: Date.now() });
-    }, randomDelay);
-  });
+  try {
+    console.log("Making real API call to:", API_URL);
+
+    const response = await fetch(API_URL, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    console.log("API Response status:", response.status);
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log("API Response data:", data);
+
+    // Handle different response formats from your Lambda
+    const count = data.count || data.visit_count || data.visitor_count;
+
+    return {
+      count: count,
+      timestamp: Date.now(),
+    };
+  } catch (error) {
+    console.error("Real API call failed:", error);
+    throw error; // Re-throw to be handled by executeCounterUpdate
+  }
 }
 
 function setLoadingState(element) {
