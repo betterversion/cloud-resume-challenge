@@ -54,6 +54,18 @@ Complete the Cloud Resume Challenge to land my first cloud engineering job!
 - **Technical Architecture**: Planned IAM permissions and API integration strategy
 - **Documentation**: Created comprehensive README.md with deployment workflows
 
+### 🔹 [Day 6 – Production Serverless Backend & Multi-Endpoint Architecture](./daily-logs/day6.md)
+- **Serverless Function**: Built production-ready Lambda function with Python 3.13 and optimized boto3 configuration
+- **Multi-Endpoint Architecture**: Implemented intelligent routing for `/counter` and `/health` endpoints in single function
+- **Atomic Database Operations**: Developed race condition-safe visitor counter using DynamoDB ADD expressions
+- **Advanced Error Handling**: Created comprehensive error management with first-time visitor initialization logic
+- **Health Monitoring**: Added non-destructive health check endpoint for load balancer and monitoring integration
+- **Security Implementation**: Configured least privilege IAM permissions with resource-specific access controls
+- **Structured Logging**: Implemented JSON-formatted logging with request correlation for CloudWatch Insights
+- **Professional Organization**: Established backend code structure with comprehensive documentation and version control
+- **Production Testing**: Validated end-to-end functionality, debugged IAM permissions, and confirmed system reliability
+- **Performance Optimization**: Achieved <100ms warm start times through connection pooling and efficient code architecture
+
 ---
 
 ## 📋 Revised Progress Timeline (Ahead of Schedule!)
@@ -64,7 +76,7 @@ Complete the Cloud Resume Challenge to land my first cloud engineering job!
 - [x] Day 3: S3 deployment with static website hosting ✅
 - [x] Day 4: CloudFront CDN + SSL + Custom domain ✅
 - [x] Day 5: Professional frontend polish + DynamoDB foundation ✅
-- [ ] Day 6: Lambda function development & API Gateway setup
+- [x] Day 6: Lambda function development & API Gateway setup
 - [ ] Day 7: Frontend-backend integration & testing
 
 ### Week 2: Backend Development & Integration (Days 8-14)
