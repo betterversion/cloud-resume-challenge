@@ -107,4 +107,5 @@
 </section>
 
 <!-- Load visitor counter JavaScript immediately after the HTML it controls -->
-<script src="/js/visitor-counter.js"></script>
+{{ $visitorCounterJS := resources.Get "js/visitor-counter.js" | fingerprint }}
+<script src="{{ $visitorCounterJS.RelPermalink }}"></script>

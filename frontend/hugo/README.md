@@ -30,6 +30,29 @@ aws s3 sync public/ s3://dzresume.dev --delete --profile crc-dev
 aws cloudfront create-invalidation --distribution-id E39IUOSQTLZZWP --paths "/*" --profile crc-dev
 ```
 
+## Cache Verification Commands
+```bash
+echo "🧪 Verifying deployment accessibility..."
+# Test site loads successfully
+HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://www.dzresume.dev/)
+if [ "$HTTP_STATUS" -eq 200 ]; then
+  echo "✅ Site is accessible"
+else
+  echo "❌ Site returned $HTTP_STATUS"
+  exit 1
+fi
+
+# Extract and test fingerprinted JavaScript asset
+FINGERPRINTED_JS=$(grep -o '/js/visitor-counter\.[^"]*\.js' public/index.html)
+JS_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "https://www.dzresume.dev${FINGERPRINTED_JS}")
+if [ "$JS_STATUS" -eq 200 ]; then
+  echo "✅ JavaScript asset is accessible"
+else
+  echo "❌ JavaScript returned $JS_STATUS"
+  exit 1
+fi
+```
+
 ---
 
 ## 🔧 AWS Services

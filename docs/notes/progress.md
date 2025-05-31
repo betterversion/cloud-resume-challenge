@@ -76,6 +76,16 @@ Complete the Cloud Resume Challenge to land my first cloud engineering job!
 - **Performance Optimization**: Achieved consistent sub-50ms API response times with automatic scaling and global CDN distribution
 - **Professional Architecture**: Transformed AWS-generated URLs into branded, memorable endpoints demonstrating production deployment maturity
 
+### 🔹 [Day 8 – Frontend-Backend Integration & Real API Calls](./daily-logs/day8.md)
+- **API Integration**: Replaced simulation with live AWS Lambda and DynamoDB calls
+- **CORS Configuration**: Implemented dynamic origin detection supporting both production and localhost development
+- **Lambda Refactoring**: Enhanced error handling and response building with professional code organization
+- **CDN Architecture**: Identified and debugged multi-layer caching issues between Cloudflare and CloudFront
+- **Development Workflow**: Established localhost-friendly development environment with proper CORS headers
+- **Performance Validation**: Verified end-to-end API functionality with comprehensive curl testing
+- **Cache Strategy**: Analyzed sophisticated caching behaviors and planned Hugo fingerprinting implementation
+- **Systems Debugging**: Systematic troubleshooting of distributed system cache interactions
+
 ---
 
 ## 📋 Revised Progress Timeline (Ahead of Schedule!)
@@ -90,6 +100,7 @@ Complete the Cloud Resume Challenge to land my first cloud engineering job!
 - [x] Day 7: Frontend-backend integration & testing
 
 ### Week 2: Backend Development & Integration (Days 8-14)
+- [x] Day 7: Frontend-backend integration & testing
 - [ ] Day 8: Complete API integration & JavaScript connection
 - [ ] Day 9: Error handling & edge case testing
 - [ ] Day 10: Python unit tests & end-to-end testing
