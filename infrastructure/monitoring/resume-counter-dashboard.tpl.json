@@ -1,0 +1,368 @@
+{
+  "widgets": [
+    {
+      "height": 2,
+      "width": 24,
+      "y": 0,
+      "x": 0,
+      "type": "text",
+      "properties": {
+        "markdown": "## 📈 Business Intelligence – Visitor Analytics (${environment})\nReal-time insights derived from application logs\n",
+        "background": "transparent"
+      }
+    },
+    {
+      "height": 7,
+      "width": 12,
+      "y": 2,
+      "x": 0,
+      "type": "log",
+      "properties": {
+        "query": "SOURCE '${lambda_log_group}' | fields @timestamp\n| filter @message like /visitor_counter_success/ or @message like /Successfully incremented counter/\n| stats count() as requests by bin(1h)\n| sort @timestamp desc\n| limit 168\n",
+        "queryLanguage": "CWLI",
+        "region": "${aws_region}",
+        "stacked": false,
+        "view": "bar",
+        "title": "Hourly Visitor Activity (7 Days) - ${environment}"
+      }
+    },
+    {
+      "height": 7,
+      "width": 12,
+      "y": 2,
+      "x": 12,
+      "type": "log",
+      "properties": {
+        "title": "Daily Visitor Growth Trend (30 Days) - ${environment}",
+        "query": "SOURCE '${lambda_log_group}'\n| filter @message like /visitor_counter_success/ or @message like /Successfully incremented counter/\n| parse @message /counter to (?<visitor_count>\\d+)/ \n| stats max(visitor_count) as daily_total by bin(1d)\n| sort @timestamp desc\n| limit 30",
+        "queryLanguage": "CWLI",
+        "region": "${aws_region}",
+        "view": "timeSeries",
+        "stacked": false
+      }
+    },
+    {
+      "height": 2,
+      "width": 24,
+      "y": 9,
+      "x": 0,
+      "type": "text",
+      "properties": {
+        "markdown": "## 📡 API Gateway – Frontend Traffic Monitoring (${environment})\n",
+        "background": "transparent"
+      }
+    },
+    {
+      "height": 6,
+      "width": 12,
+      "y": 11,
+      "x": 0,
+      "type": "metric",
+      "properties": {
+        "view": "timeSeries",
+        "stacked": false,
+        "metrics": [
+          [
+            "AWS/ApiGateway",
+            "Count",
+            "ApiName",
+            "${api_gateway_name}",
+            "Resource",
+            "/counter",
+            "Stage",
+            "${api_stage_name}",
+            "Method",
+            "GET",
+            { "region": "${aws_region}" }
+          ],
+          [
+            ".",
+            "Latency",
+            ".",
+            ".",
+            ".",
+            ".",
+            ".",
+            ".",
+            ".",
+            ".",
+            { "region": "${aws_region}" }
+          ],
+          [".", "IntegrationLatency", ".", "."]
+        ],
+        "region": "${aws_region}",
+        "title": "API Count & Latency - ${environment}",
+        "period": 300
+      }
+    },
+    {
+      "height": 6,
+      "width": 12,
+      "y": 11,
+      "x": 12,
+      "type": "metric",
+      "properties": {
+        "metrics": [
+          [
+            "AWS/ApiGateway",
+            "4XXError",
+            "ApiName",
+            "${api_gateway_name}",
+            "Resource",
+            "/counter",
+            "Stage",
+            "${api_stage_name}",
+            "Method",
+            "GET",
+            { "region": "${aws_region}" }
+          ],
+          [
+            ".",
+            "5XXError",
+            ".",
+            ".",
+            ".",
+            ".",
+            ".",
+            ".",
+            ".",
+            ".",
+            { "region": "${aws_region}" }
+          ],
+          [
+            ".",
+            "Count",
+            ".",
+            ".",
+            ".",
+            ".",
+            ".",
+            ".",
+            ".",
+            ".",
+            { "region": "${aws_region}" }
+          ]
+        ],
+        "view": "timeSeries",
+        "stacked": false,
+        "region": "${aws_region}",
+        "title": "API Errors (4XX, 5XX) + Request Count - ${environment}",
+        "period": 300,
+        "stat": "Sum",
+        "annotations": {
+          "horizontal": [
+            {
+              "label": "Error Spike",
+              "value": 1,
+              "fill": "below"
+            },
+            {
+              "label": "Warning Level",
+              "value": 0.5,
+              "fill": "below"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "height": 2,
+      "width": 24,
+      "y": 17,
+      "x": 0,
+      "type": "text",
+      "properties": {
+        "markdown": "## 🗃️ DynamoDB – Backend Storage Monitoring (Shared)\n",
+        "background": "transparent"
+      }
+    },
+    {
+      "height": 6,
+      "width": 6,
+      "y": 19,
+      "x": 0,
+      "type": "metric",
+      "properties": {
+        "view": "timeSeries",
+        "stacked": false,
+        "metrics": [
+          [
+            "AWS/DynamoDB",
+            "ConsumedWriteCapacityUnits",
+            "TableName",
+            "${dynamodb_table_name}"
+          ]
+        ],
+        "region": "${aws_region}",
+        "title": "Write Capacity"
+      }
+    },
+    {
+      "height": 6,
+      "width": 6,
+      "y": 19,
+      "x": 6,
+      "type": "metric",
+      "properties": {
+        "metrics": [
+          [
+            "AWS/DynamoDB",
+            "ConsumedWriteCapacityUnits",
+            "TableName",
+            "${dynamodb_table_name}",
+            { "region": "${aws_region}", "visible": false }
+          ],
+          [".", "ConsumedReadCapacityUnits", ".", "."]
+        ],
+        "view": "timeSeries",
+        "stacked": false,
+        "region": "${aws_region}",
+        "title": "Read Capacity",
+        "period": 300,
+        "stat": "Average"
+      }
+    },
+    {
+      "height": 6,
+      "width": 6,
+      "y": 19,
+      "x": 12,
+      "type": "metric",
+      "properties": {
+        "view": "timeSeries",
+        "stacked": false,
+        "metrics": [
+          [
+            "AWS/DynamoDB",
+            "SuccessfulRequestLatency",
+            "TableName",
+            "${dynamodb_table_name}",
+            "Operation",
+            "GetItem"
+          ],
+          ["...", "PutItem"],
+          ["...", "UpdateItem"]
+        ],
+        "region": "${aws_region}",
+        "title": "DynamoDB Latency"
+      }
+    },
+    {
+      "height": 6,
+      "width": 6,
+      "y": 19,
+      "x": 18,
+      "type": "metric",
+      "properties": {
+        "view": "timeSeries",
+        "stacked": false,
+        "metrics": [["AWS/DynamoDB", "UserErrors"]],
+        "region": "${aws_region}",
+        "title": "DynamoDB User Errors"
+      }
+    },
+    {
+      "height": 2,
+      "width": 24,
+      "y": 25,
+      "x": 0,
+      "type": "text",
+      "properties": {
+        "markdown": "## ⚙️ Lambda – Backend Logic Monitoring (${environment})",
+        "background": "transparent"
+      }
+    },
+    {
+      "height": 6,
+      "width": 12,
+      "y": 27,
+      "x": 0,
+      "type": "metric",
+      "properties": {
+        "view": "timeSeries",
+        "stacked": false,
+        "region": "${aws_region}",
+        "title": "Lambda Invocations & Errors - ${environment}",
+        "metrics": [
+          [
+            "AWS/Lambda",
+            "Invocations",
+            "FunctionName",
+            "${lambda_function_name}"
+          ],
+          [".", "Errors", ".", "."]
+        ],
+        "stat": "Sum",
+        "period": 300
+      }
+    },
+    {
+      "height": 6,
+      "width": 12,
+      "y": 27,
+      "x": 12,
+      "type": "metric",
+      "properties": {
+        "view": "timeSeries",
+        "stacked": false,
+        "region": "${aws_region}",
+        "title": "Lambda Duration (ms) - ${environment}",
+        "metrics": [
+          ["AWS/Lambda", "Duration", "FunctionName", "${lambda_function_name}"]
+        ],
+        "stat": "Average",
+        "period": 300,
+        "annotations": {
+          "horizontal": [
+            {
+              "label": "Warning > 1000ms",
+              "value": 1000,
+              "fill": "below"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "height": 6,
+      "width": 12,
+      "y": 33,
+      "x": 0,
+      "type": "metric",
+      "properties": {
+        "view": "timeSeries",
+        "stacked": false,
+        "region": "${aws_region}",
+        "title": "Lambda Throttles - ${environment}",
+        "metrics": [
+          ["AWS/Lambda", "Throttles", "FunctionName", "${lambda_function_name}"]
+        ],
+        "stat": "Sum",
+        "period": 300
+      }
+    },
+    {
+      "height": 6,
+      "width": 12,
+      "y": 33,
+      "x": 12,
+      "type": "metric",
+      "properties": {
+        "view": "timeSeries",
+        "stacked": false,
+        "region": "${aws_region}",
+        "title": "Lambda Concurrent Executions - ${environment}",
+        "metrics": [
+          [
+            "AWS/Lambda",
+            "ConcurrentExecutions",
+            "FunctionName",
+            "${lambda_function_name}"
+          ]
+        ],
+        "stat": "Maximum",
+        "period": 300
+      }
+    }
+  ]
+}
