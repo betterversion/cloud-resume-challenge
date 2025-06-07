@@ -1,3 +1,36 @@
 .env
 *.pyc
 .DS_Store
+logs/
+*.log
+*.zip
+.terraform/
+*.tfstate
+*.tfstate.backup
+.crc-cache/  # if using custom local cache
+
+# Terraform state files (we'll use remote state)
+*.tfstate
+*.tfstate.*
+
+# Terraform variable files (contain sensitive data)
+*.tfvars
+terraform.tfvars
+
+# Terraform working directory
+.terraform/
+.terraform.lock.hcl
+
+# Terraform plans
+terraform.tfplan
+*.tfplan
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo

@@ -103,7 +103,8 @@ def get_cors_origin(event):
         'https://www.dzresume.dev',
         'https://dzresume.dev',
         'http://localhost:1313',
-        'http://127.0.0.1:1313'
+        'http://127.0.0.1:1313',
+        'https://test.dzresume.dev'
     ]
 
     if request_origin in allowed_origins:
