@@ -17,9 +17,15 @@ frontend/hugo/
 ---
 
 ## 🛠️ Local Development
+
 ```bash
-hugo serve --baseURL="http://localhost:1313"
-```
+cd frontend/hugo
+
+# Test blue environment (default)
+HUGO_ENV=blue hugo server
+
+# Test green environment
+HUGO_ENV=green hugo server
 
 ---
 

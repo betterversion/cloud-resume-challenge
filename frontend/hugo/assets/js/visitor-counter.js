@@ -1,3 +1,10 @@
+// Define environment once at the top level
+const ENVIRONMENT = '{{ getenv "HUGO_ENV" | default "blue" }}';
+const API_URLS = {
+  blue: "{{ .Site.Params.api_url_blue }}",
+  green: "{{ .Site.Params.api_url_green }}",
+};
+
 // Professional visitor counter with minimum loading time implementation
 document.addEventListener("DOMContentLoaded", function () {
   // Brief delay to ensure DOM readiness, then initialize counter
@@ -66,11 +73,10 @@ async function executeCounterUpdate(element) {
 }
 
 async function makeRealApiCall() {
-  // Your actual API Gateway URL - replace with yours
-  const API_URL = "https://api.dzresume.dev/counter";
+  const API_URL = `${API_URLS[ENVIRONMENT]}/counter`;
 
   try {
-    console.log("Making real API call to:", API_URL);
+    console.log(`Making API call to ${ENVIRONMENT} environment:`, API_URL);
 
     const response = await fetch(API_URL, {
       method: "GET",

@@ -1,0 +1,57 @@
+{{/*
+    Visitor Counter JavaScript Processing Partial
+
+    This partial processes the visitor counter JavaScript through Hugo Pipes:
+    1. Retrieves the source file from assets/js/visitor-counter.js
+    2. Processes template variables through Hugo's template engine
+    3. Applies production optimizations (minification)
+    4. Generates script tag with content-hashed filename
+  */}}
+
+  {{/* Get the JavaScript source file from assets directory */}}
+  {{ $js := resources.Get "js/visitor-counter.js" }}
+
+  {{/*
+    Verify the source file exists before processing
+    This prevents cryptic error messages if the file path is incorrect
+  */}}
+  {{ if not $js }}
+    {{ errorf "Visitor counter JavaScript file not found at assets/js/visitor-counter.js" }}
+  {{ end }}
+
+  {{/*
+    Process the file through Hugo's template engine
+    This step replaces template variables with actual configuration values
+    The output filename helps track this processed asset in Hugo's pipeline
+  */}}
+  {{ $js = $js | resources.ExecuteAsTemplate "js/visitor-counter-processed.js" . }}
+
+  {{/*
+    Apply production optimizations
+    - Minify in production for smaller file size and faster loading
+    - Skip minification in development for easier debugging
+    - Add fingerprinting for optimal browser cache management
+  */}}
+  {{ if hugo.IsProduction }}
+    {{ $js = $js | resources.Minify }}
+  {{ end }}
+  {{ $js = $js | resources.Fingerprint }}
+
+  {{/*
+    Generate the final script tag
+    - Use 'defer' attribute for optimal loading performance
+    - The fingerprinted filename ensures browsers download updates when content changes
+  */}}
+  <script src="{{ $js.RelPermalink }}" defer></script>
+
+  {{/*
+    Development mode debugging information
+    This appears as HTML comments that help you understand the processing pipeline
+  */}}
+  {{ if hugo.IsDevelopment }}
+    <!-- Hugo Pipes Debug Information -->
+    <!-- Source file: assets/js/visitor-counter.js -->
+    <!-- Processed file: {{ $js.RelPermalink }} -->
+    <!-- File size: {{ len $js.Content }} bytes -->
+    <!-- Fingerprint: {{ $js.Data.Integrity }} -->
+  {{ end }}

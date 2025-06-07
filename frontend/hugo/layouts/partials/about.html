@@ -106,6 +106,5 @@
   </div>
 </section>
 
-<!-- Load visitor counter JavaScript immediately after the HTML it controls -->
-{{ $visitorCounterJS := resources.Get "js/visitor-counter.js" | fingerprint }}
-<script src="{{ $visitorCounterJS.RelPermalink }}"></script>
+<!-- Hugo Pipes processed visitor counter JavaScript -->
+{{ partial "visitor-counter-js.html" . }}

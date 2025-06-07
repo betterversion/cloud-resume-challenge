@@ -1,0 +1,8 @@
+{{/*
+    Minimal deployment tracking
+  */}}
+  {{ $versionNumber := getenv "HUGO_DEPLOY_VERSION" | default "1" }}
+  {{ $environment := getenv "HUGO_ENV" | default "blue" }}
+  {{ $deploymentVersion := printf "%s-v%s-%s" $environment $versionNumber (now.Format "20060102-1504") }}
+
+  <meta name="deployment-version" content="{{ $deploymentVersion }}">
