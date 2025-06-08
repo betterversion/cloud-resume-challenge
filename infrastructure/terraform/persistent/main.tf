@@ -1,6 +1,8 @@
 provider "aws" {
-  profile = "crc-prod"
-  region  = "us-east-1"
+  region = "us-east-1"
+
+  # Use profile only when available (local development)
+  profile = var.aws_profile != "" ? var.aws_profile : null
 
   default_tags {
     tags = {

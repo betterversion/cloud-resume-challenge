@@ -9,6 +9,11 @@ variable "active_environment" {
   }
 }
 
+variable "aws_profile" {
+  description = "AWS profile for local development"
+  type        = string
+  default     = ""
+}
 
 variable "project_name" {
   description = "Project name for resource naming"

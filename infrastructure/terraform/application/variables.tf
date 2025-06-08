@@ -1,7 +1,7 @@
 variable "aws_profile" {
   description = "AWS profile to use for authentication"
   type        = string
-  default     = "crc-prod"
+  default     = ""
 }
 
 variable "project_name" {

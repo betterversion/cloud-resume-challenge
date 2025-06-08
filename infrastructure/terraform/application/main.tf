@@ -22,7 +22,8 @@ terraform {
 }
 
 provider "aws" {
-  profile = var.aws_profile
+  # Use profile only when available (local development)
+  profile = var.aws_profile != "" ? var.aws_profile : null
   default_tags {
     tags = local.common_tags
   }
