@@ -1,0 +1,262 @@
+# .github/workflows/promote-production.yml
+name: Promote to Production
+
+on:
+  workflow_dispatch:
+    inputs:
+      force_promotion:
+        description: 'Force promotion despite staging failures'
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  id-token: write
+  contents: read
+  actions: read
+
+env:
+  AWS_REGION: us-east-1
+
+jobs:
+  analyze-and-plan:
+    name: 🎯 Analyze & Plan Promotion
+    runs-on: ubuntu-latest
+    outputs:
+      can_promote: ${{ steps.staging.outputs.can_promote }}
+      version: ${{ steps.staging.outputs.version }}
+      current_active: ${{ steps.infra.outputs.current_active }}
+      target_environment: ${{ steps.infra.outputs.target_environment }}
+      cf_main_id: ${{ steps.infra.outputs.cf_main_id }}
+    steps:
+      - name: Check staging status
+        id: staging
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: runs } = await github.rest.actions.listWorkflowRuns({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'deploy-staging.yml',
+              per_page: 1
+            });
+
+            const latestRun = runs.workflow_runs[0];
+            const version = `v${latestRun.run_number}`;
+            const status = latestRun.conclusion;
+            const canPromote = (status === 'success') || ('${{ inputs.force_promotion }}' === 'true');
+
+            core.setOutput('version', version);
+            core.setOutput('can_promote', canPromote);
+
+            if (!canPromote) {
+              core.setFailed(`❌ Staging ${version} failed. Use force_promotion to override.`);
+            }
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Cache Terraform
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.terraform.d/plugin-cache
+            infrastructure/terraform/persistent/.terraform
+          key: terraform-persistent-${{ runner.os }}-${{ hashFiles('infrastructure/terraform/persistent/.terraform.lock.hcl') }}
+          restore-keys: terraform-persistent-${{ runner.os }}-
+
+      - name: Get infrastructure info
+        id: infra
+        working-directory: infrastructure/terraform/persistent
+        run: |
+          export TF_PLUGIN_CACHE_DIR=$HOME/.terraform.d/plugin-cache
+          mkdir -p $TF_PLUGIN_CACHE_DIR
+
+          terraform init
+
+          CURRENT_ACTIVE=$(terraform output -raw active_environment)
+          CF_MAIN_ID=$(terraform output -raw cf_main_distribution_id)
+          TARGET=$([[ "$CURRENT_ACTIVE" == "blue" ]] && echo "green" || echo "blue")
+
+          echo "current_active=$CURRENT_ACTIVE" >> $GITHUB_OUTPUT
+          echo "target_environment=$TARGET" >> $GITHUB_OUTPUT
+          echo "cf_main_id=$CF_MAIN_ID" >> $GITHUB_OUTPUT
+
+          echo "🎯 PROMOTION PLAN"
+          echo "Current: $CURRENT_ACTIVE → Target: $TARGET"
+          echo "Version: ${{ steps.staging.outputs.version }}"
+
+  validate-staging:
+    name: 🔍 Validate Staging
+    runs-on: ubuntu-latest
+    needs: analyze-and-plan
+    if: needs.analyze-and-plan.outputs.can_promote == 'true' && inputs.force_promotion != true
+    steps:
+      - name: Test staging site
+        run: |
+          HTTP_STATUS=$(curl -sL -w "%{http_code}" -o /dev/null "https://test.dzresume.dev")
+          if [[ "$HTTP_STATUS" != "200" ]]; then
+            echo "❌ Staging not responding (HTTP $HTTP_STATUS)"
+            exit 1
+          fi
+          echo "✅ Staging validation passed"
+
+  switch-traffic:
+    name: 🚨 Switch Production Traffic
+    runs-on: ubuntu-latest
+    needs: [analyze-and-plan, validate-staging]
+    if: always() && needs.analyze-and-plan.outputs.can_promote == 'true' && (needs.validate-staging.result == 'success' || needs.validate-staging.result == 'skipped')
+    environment: production
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Cache Terraform
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.terraform.d/plugin-cache
+            infrastructure/terraform/persistent/.terraform
+          key: terraform-persistent-${{ runner.os }}-${{ hashFiles('infrastructure/terraform/persistent/.terraform.lock.hcl') }}
+          restore-keys: terraform-persistent-${{ runner.os }}-
+
+      - name: Switch traffic
+        working-directory: infrastructure/terraform/persistent
+        run: |
+          export TF_PLUGIN_CACHE_DIR=$HOME/.terraform.d/plugin-cache
+          mkdir -p $TF_PLUGIN_CACHE_DIR
+
+          echo "🔄 Switching ${{ needs.analyze-and-plan.outputs.current_active }} → ${{ needs.analyze-and-plan.outputs.target_environment }}"
+
+          terraform init
+          terraform apply -var="active_environment=${{ needs.analyze-and-plan.outputs.target_environment }}" -auto-approve
+
+          echo "✅ Traffic switched to ${{ needs.analyze-and-plan.outputs.target_environment }}"
+
+      - name: Invalidate production cache
+        id: invalidation
+        run: |
+          echo "🔄 Creating CloudFront invalidation..."
+
+          INVALIDATION_ID=$(aws cloudfront create-invalidation \
+            --distribution-id "${{ needs.analyze-and-plan.outputs.cf_main_id}}" \
+            --paths '/*' \
+            --query 'Invalidation.Id' \
+            --output text)
+
+          echo "invalidation_id=$INVALIDATION_ID" >> $GITHUB_OUTPUT
+
+      - name: ⏳ Wait for invalidation completion
+        run: |
+          echo "⏳ Waiting for invalidation to complete..."
+          echo "   Distribution: ${{ needs.analyze-and-plan.outputs.cf_main_id }}"
+          echo "   Invalidation: ${{ steps.invalidation.outputs.invalidation_id }}"
+
+          aws cloudfront wait invalidation-completed \
+            --distribution-id "${{ needs.analyze-and-plan.outputs.cf_main_id }}" \
+            --id "${{ steps.invalidation.outputs.invalidation_id }}"
+
+          echo "✅ CloudFront invalidation completed!"
+
+  verify-production:
+    name: ✅ Verify Production
+    runs-on: ubuntu-latest
+    needs: [analyze-and-plan, switch-traffic]
+    steps:
+      - name: Test production
+        run: |
+          echo "🧪 Testing production: https://dzresume.dev"
+          echo "Expected version: ${{ needs.analyze-and-plan.outputs.version }}"
+          PAGE_CONTENT=$(curl -sL "https://dzresume.dev" 2>/dev/null)
+
+          DEPLOYED_VERSION=$(echo "$PAGE_CONTENT" | grep 'name=.*deployment-version' | sed 's/.*deployment-version content=//' | sed 's/^"//' | sed 's/".*//' 2>/dev/null || echo "not_found")
+
+          if [[ "$DEPLOYED_VERSION" == "not_found" ]]; then
+            echo "❌ Version meta tag not found (deployment may be broken)"
+            exit 1
+          elif [[ "$DEPLOYED_VERSION" == *"${{ needs.determine-promotion.outputs.version }}"* ]]; then
+            echo "✅ Version verification successful: $DEPLOYED_VERSION"
+          else
+            echo "❌ Version mismatch!"
+            echo "   Expected: ${{ needs.determine-promotion.outputs.version }}"
+            echo "   Found: $DEPLOYED_VERSION"
+            exit 1
+          fi
+
+  rollback:
+    name: 🚨 Emergency Rollback
+    runs-on: ubuntu-latest
+    needs: [analyze-and-plan, switch-traffic, verify-production]
+    if: failure() && needs.switch-traffic.result == 'success'
+    environment: production
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Cache Terraform
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.terraform.d/plugin-cache
+            infrastructure/terraform/persistent/.terraform
+          key: terraform-persistent-${{ runner.os }}-${{ hashFiles('infrastructure/terraform/persistent/.terraform.lock.hcl') }}
+          restore-keys: terraform-persistent-${{ runner.os }}-
+
+      - name: Rollback
+        working-directory: infrastructure/terraform/persistent
+        run: |
+          export TF_PLUGIN_CACHE_DIR=$HOME/.terraform.d/plugin-cache
+          mkdir -p $TF_PLUGIN_CACHE_DIR
+
+          echo "🚨 Rolling back to ${{ needs.analyze-and-plan.outputs.current_active }}"
+
+          terraform init
+          terraform apply -var="active_environment=${{ needs.analyze-and-plan.outputs.current_active }}" -auto-approve
+
+          echo "✅ Rollback complete"
+
+  summary:
+    name: 📊 Summary
+    runs-on: ubuntu-latest
+    needs: [analyze-and-plan, switch-traffic, verify-production]
+    if: always()
+    steps:
+      - name: Report results
+        run: |
+          echo "🚀 PROMOTION RESULTS"
+          echo "Version: ${{ needs.analyze-and-plan.outputs.version }}"
+          echo "Switch: ${{ needs.switch-traffic.result == 'success' && '✅' || '❌' }}"
+          echo "Verify: ${{ needs.verify-production.result == 'success' && '✅' || '❌' }}"
+          echo ""
+          if [[ "${{ needs.verify-production.result }}" == "success" ]]; then
+            echo "🎉 Production: https://dzresume.dev"
+          else
+            echo "❌ Promotion failed - check logs"
+          fi
