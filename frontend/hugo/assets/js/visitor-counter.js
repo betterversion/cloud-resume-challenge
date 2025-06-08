@@ -126,3 +126,18 @@ function handleCounterError(element) {
   element.className = "count-error";
   element.textContent = "--";
 }
+
+// ============================================
+// TESTING EXPORTS (Node.js only)
+// ============================================
+// This code only runs during testing, never in browsers
+if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
+  module.exports = {
+    initializeVisitorCounter,
+    executeCounterUpdate,
+    makeRealApiCall,
+    setLoadingState,
+    updateCounterValue,
+    handleCounterError
+  }
+}

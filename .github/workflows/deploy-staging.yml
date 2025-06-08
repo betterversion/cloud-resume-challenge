@@ -99,10 +99,43 @@ jobs:
           echo "🎯 Will deploy to: $TARGET (inactive)"
           echo "📡 CloudFront test ID: $CF_TEST_ID"
 
-  deploy-frontend:
-    name: 🎨 Frontend Pipeline
+  frontend-unit-testing:
+      name: 🧪 Frontend Unit Testing
+      runs-on: ubuntu-latest
+      needs: determine-environment
+      if: needs.determine-environment.outputs.frontend == 'true'
+      steps:
+        - name: Checkout
+          uses: actions/checkout@v4
+
+        - name: Setup Node.js
+          uses: actions/setup-node@v4
+          with:
+            node-version: '20'
+            cache: 'npm'
+            cache-dependency-path: frontend/hugo/package-lock.json
+
+        - name: Install dependencies and run unit tests
+          working-directory: frontend/hugo
+          run: |
+            npm ci
+            npm test
+            echo "✅ All frontend unit tests passed"
+
+        - name: Test summary
+          if: always()
+          run: |
+            if [ $? -eq 0 ]; then
+              echo "🎉 Unit tests: PASSED" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "❌ Unit tests: FAILED" >> $GITHUB_STEP_SUMMARY
+              exit 1
+            fi
+
+  build-deploy-frontend:
+    name: 🎨 Build & Deploy Frontend
     runs-on: ubuntu-latest
-    needs: determine-environment
+    needs: [determine-environment, frontend-unit-testing]
     if: needs.determine-environment.outputs.frontend == 'true'
     steps:
       - name: Checkout
@@ -141,7 +174,7 @@ jobs:
   invalidate-test:
     name: 🌐 Invalidate Frontend Cache
     runs-on: ubuntu-latest
-    needs: [deploy-frontend, determine-environment]
+    needs: [build-deploy-frontend, determine-environment]
     environment: staging
     steps:
       - name: 🔐 Configure AWS credentials
@@ -169,10 +202,10 @@ jobs:
 
           echo "✅ CloudFront cache cleared and ready for testing"
 
-  test-frontend-deployment:
+  verify-frontend-deployment:
     name: ✅ Verify Frontend Deployment
     runs-on: ubuntu-latest
-    needs: [determine-environment, deploy-frontend, invalidate-test]
+    needs: [determine-environment, build-deploy-frontend, invalidate-test]
     steps:
       - name: Verify frontend deployment
         run: |
@@ -263,19 +296,19 @@ jobs:
   summary:
     name: 📊 Deployment Summary
     runs-on: ubuntu-latest
-    needs: [determine-environment, test-frontend-deployment, test-backend-deployment]
+    needs: [determine-environment, verify-frontend-deployment, test-backend-deployment]
     if: always()
     steps:
     - name: Summary
       run: |
         echo "🚀 Staging: ${{ needs.determine-environment.outputs.environment }} v${{ needs.determine-environment.outputs.version }}"
         echo ""
-        echo "Frontend: ${{ needs.test-frontend-deployment.result || 'skipped' }}"
+        echo "Frontend: ${{ needs.verify-frontend-deployment.result || 'skipped' }}"
         echo "Backend: ${{ needs.test-backend-deployment.result || 'skipped' }}"
         echo ""
-        if [[ "${{ needs.test-frontend-deployment.result }}" == "success" && "${{ needs.test-backend-deployment.result }}" == "success" ]]; then
+        if [[ "${{ needs.verify-frontend-deployment.result }}" == "success" && "${{ needs.test-backend-deployment.result }}" == "success" ]]; then
           echo "✅ Ready for production: https://test.dzresume.dev"
-        elif [[ "${{ needs.test-frontend-deployment.result }}" == "skipped" && "${{ needs.test-backend-deployment.result }}" == "skipped" ]]; then
+        elif [[ "${{ needs.verify-frontend-deployment.result }}" == "skipped" && "${{ needs.test-backend-deployment.result }}" == "skipped" ]]; then
           echo "⚠️  No deployments executed"
         else
           echo "❌ Fix issues before promotion"

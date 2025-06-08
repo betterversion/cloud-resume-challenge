@@ -1,0 +1,16 @@
+{
+  "name": "hugo",
+  "version": "1.0.0",
+  "description": "Professional resume site built with Hugo, deployed via AWS S3 + CloudFront.",
+  "main": "index.js",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "vitest": "^3.2.2"
+  }
+}
