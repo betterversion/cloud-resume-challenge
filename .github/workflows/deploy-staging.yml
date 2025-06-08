@@ -1,0 +1,282 @@
+# .github/workflows/deploy-staging.yml
+name: Deploy to Staging
+
+on:
+  push:
+    branches: ['feature**']
+    paths:
+      - 'frontend/hugo/**'
+      - 'infrastructure/terraform/application/**'
+      - '.github/workflows/deploy-staging.yml'
+
+  workflow_dispatch:
+    inputs:
+      deploy_frontend:
+        description: 'Deploy frontend'
+        required: false
+        type: boolean
+        default: true
+      deploy_backend:
+        description: 'Deploy backend'
+        required: false
+        type: boolean
+        default: true
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: us-east-1
+  AWS_ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}
+  HUGO_VERSION: 'latest'
+
+jobs:
+  determine-environment:
+    name: 🎯 Orchestrate Deployment
+    runs-on: ubuntu-latest
+    outputs:
+      frontend: ${{ steps.config.outputs.frontend }}
+      backend: ${{ steps.config.outputs.backend }}
+      environment: ${{ steps.target.outputs.environment }}
+      version: ${{ github.run_number }}
+      cf_test_id: ${{ steps.target.outputs.cf_test_id }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Configure deployment
+        id: config
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "frontend=${{ github.event.inputs.deploy_frontend }}" >> $GITHUB_OUTPUT
+            echo "backend=${{ github.event.inputs.deploy_backend }}" >> $GITHUB_OUTPUT
+          else
+            FRONTEND_CHANGED=$(git diff --name-only HEAD~1 HEAD | grep -q 'frontend/hugo' && echo true || echo false)
+            BACKEND_CHANGED=$(git diff --name-only HEAD~1 HEAD | grep -q 'infrastructure/terraform/application' && echo true || echo false)
+            echo "frontend=$FRONTEND_CHANGED" >> $GITHUB_OUTPUT
+            echo "backend=$BACKEND_CHANGED" >> $GITHUB_OUTPUT
+          fi
+
+      - name: 🔐 Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: ⚙️ Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: 📦 Cache Terraform providers
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.terraform.d/plugin-cache
+            infrastructure/terraform/persistent/.terraform
+          key: terraform-persistent-${{ runner.os }}-${{ hashFiles('infrastructure/terraform/persistent/.terraform.lock.hcl') }}
+          restore-keys: |
+            terraform-persistent-${{ runner.os }}-
+
+      - name: Get infrastructure info
+        id: target
+        run: |
+          # Enable Terraform provider caching
+          export TF_PLUGIN_CACHE_DIR=$HOME/.terraform.d/plugin-cache
+          mkdir -p $TF_PLUGIN_CACHE_DIR
+
+          cd infrastructure/terraform/persistent
+          terraform init
+
+          # Get ALL persistent infrastructure info in one operation
+          ACTIVE=$(terraform output -raw active_environment)
+          CF_TEST_ID=$(terraform output -raw cf_test_distribution_id)
+          TARGET=$([[ "$ACTIVE" == "blue" ]] && echo "green" || echo "blue")
+
+          echo "environment=$TARGET" >> $GITHUB_OUTPUT
+          echo "cf_test_id=$CF_TEST_ID" >> $GITHUB_OUTPUT
+          echo "🎯 Will deploy to: $TARGET (inactive)"
+          echo "📡 CloudFront test ID: $CF_TEST_ID"
+
+  deploy-frontend:
+    name: 🎨 Frontend Pipeline
+    runs-on: ubuntu-latest
+    needs: determine-environment
+    if: needs.determine-environment.outputs.frontend == 'true'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+          fetch-depth: 0
+
+      - name: Setup Hugo
+        uses: peaceiris/actions-hugo@v3
+        with:
+          hugo-version: ${{ env.HUGO_VERSION }}
+          extended: true
+
+      - name: Build Hugo site
+        working-directory: frontend/hugo
+        run: |
+          export HUGO_DEPLOY_VERSION="${{ needs.determine-environment.outputs.version }}"
+          export HUGO_ENV="${{ needs.determine-environment.outputs.environment }}"
+          rm -rf public/*
+          hugo --minify --environment "$HUGO_ENV"
+          echo "✅ Built $HUGO_ENV site v$HUGO_DEPLOY_VERSION"
+
+      - name: 🔐 Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Deploy to S3
+        working-directory: frontend/hugo
+        run: |
+          aws s3 sync public/ "s3://dzresume-prod/${{ needs.determine-environment.outputs.environment }}/" --delete
+          echo "✅ Deployed to s3://dzresume-prod/${{ needs.determine-environment.outputs.environment }}/"
+
+  invalidate-test:
+    name: 🌐 Invalidate Frontend Cache
+    runs-on: ubuntu-latest
+    needs: [deploy-frontend, determine-environment]
+    environment: staging
+    steps:
+      - name: 🔐 Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: 🔄 Create & wait for invalidation
+        run: |
+          CF_ID="${{ needs.determine-environment.outputs.cf_test_id }}"
+          echo "Using CloudFront distribution: $CF_ID"
+
+          INVALIDATION_ID=$(aws cloudfront create-invalidation \
+            --distribution-id "$CF_ID" \
+            --paths '/*' \
+            --query 'Invalidation.Id' \
+            --output text)
+
+          echo "⏳ Waiting for invalidation $INVALIDATION_ID to complete..."
+
+          aws cloudfront wait invalidation-completed \
+            --distribution-id "$CF_ID" \
+            --id "$INVALIDATION_ID"
+
+          echo "✅ CloudFront cache cleared and ready for testing"
+
+  test-frontend-deployment:
+    name: ✅ Verify Frontend Deployment
+    runs-on: ubuntu-latest
+    needs: [determine-environment, deploy-frontend, invalidate-test]
+    steps:
+      - name: Verify frontend deployment
+        run: |
+          PAGE_CONTENT=$(curl -sL "https://test.dzresume.dev" 2>/dev/null)
+          DEPLOYED_VERSION=$(echo "$PAGE_CONTENT" | grep 'name=.*deployment-version' | sed 's/.*deployment-version content=//' | sed 's/^"//' | sed 's/".*//' 2>/dev/null || echo "not_found")
+
+          if [[ "$DEPLOYED_VERSION" == "not_found" ]]; then
+            echo "❌ Version meta tag not found (deployment may be broken)"
+            exit 1
+          elif [[ "$DEPLOYED_VERSION" == *"v${{ needs.determine-environment.outputs.version }}"* ]]; then
+            echo "✅ Version verification successful: $DEPLOYED_VERSION"
+          else
+            echo "❌ Version mismatch!"
+            echo "   Expected: v${{ needs.determine-environment.outputs.version }}"
+            echo "   Found: $DEPLOYED_VERSION"
+            exit 1
+          fi
+
+  deploy-backend:
+    name: ⚡ Backend Pipeline
+    runs-on: ubuntu-latest
+    needs: determine-environment
+    environment: staging
+    if: needs.determine-environment.outputs.backend == 'true'
+    outputs:
+      health_url: ${{ steps.deploy.outputs.health_url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: 🔐 Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: 📦 Cache Terraform providers
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.terraform.d/plugin-cache
+            infrastructure/terraform/application/.terraform
+          key: terraform-application-${{ runner.os }}-${{ hashFiles('infrastructure/terraform/application/.terraform.lock.hcl') }}
+          restore-keys: |
+            terraform-application-${{ runner.os }}-
+
+      - name: Deploy backend
+        id: deploy
+        working-directory: infrastructure/terraform/application
+        run: |
+          # Enable Terraform provider caching
+          export TF_PLUGIN_CACHE_DIR=$HOME/.terraform.d/plugin-cache
+          mkdir -p $TF_PLUGIN_CACHE_DIR
+
+          terraform init
+          terraform workspace select ${{ needs.determine-environment.outputs.environment }}
+          terraform apply -auto-approve
+          HEALTH_URL=$(terraform output -raw health_endpoint_url)
+          echo "health_url=$HEALTH_URL" >> $GITHUB_OUTPUT
+          echo "✅ Backend deployed to ${{ needs.determine-environment.outputs.environment }}"
+
+  test-backend-deployment:
+    name: ⚡ Verify Backend Deployment
+    runs-on: ubuntu-latest
+    needs: [determine-environment, deploy-backend]
+    if: needs.deploy-backend.result == 'success'
+    steps:
+      - name: Verify backend deployment
+        run: |
+          HEALTH_URL="${{ needs.deploy-backend.outputs.health_url }}"
+          echo "Testing backend health: $HEALTH_URL"
+
+          RESPONSE=$(curl -s "$HEALTH_URL" 2>/dev/null || echo "FAILED")
+
+          if [[ "$RESPONSE" == "FAILED" ]]; then
+            echo "❌ Backend health check failed (no response)"
+            exit 1
+          elif echo "$RESPONSE" | grep -qi "healthy\|ok"; then
+            echo "✅ Backend health check passed: $RESPONSE"
+          else
+            echo "❌ Backend unhealthy response: $RESPONSE"
+            exit 1
+          fi
+
+  summary:
+    name: 📊 Deployment Summary
+    runs-on: ubuntu-latest
+    needs: [determine-environment, test-frontend-deployment, test-backend-deployment]
+    if: always()
+    steps:
+    - name: Summary
+      run: |
+        echo "🚀 Staging: ${{ needs.determine-environment.outputs.environment }} v${{ needs.determine-environment.outputs.version }}"
+        echo ""
+        echo "Frontend: ${{ needs.test-frontend-deployment.result || 'skipped' }}"
+        echo "Backend: ${{ needs.test-backend-deployment.result || 'skipped' }}"
+        echo ""
+        if [[ "${{ needs.test-frontend-deployment.result }}" == "success" && "${{ needs.test-backend-deployment.result }}" == "success" ]]; then
+          echo "✅ Ready for production: https://test.dzresume.dev"
+        elif [[ "${{ needs.test-frontend-deployment.result }}" == "skipped" && "${{ needs.test-backend-deployment.result }}" == "skipped" ]]; then
+          echo "⚠️  No deployments executed"
+        else
+          echo "❌ Fix issues before promotion"
+        fi
