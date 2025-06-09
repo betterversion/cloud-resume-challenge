@@ -15,7 +15,7 @@ WHITE='\033[1;37m'
 NC='\033[0m' # No Color
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(dirname "$(dirname "$SCRIPT_DIR")")"
+PROJECT_ROOT="$(git rev-parse --show-toplevel 2>/dev/null)"
 TERRAFORM_PERSISTENT_DIR="$PROJECT_ROOT/infrastructure/terraform/persistent"
 
 echo -e "${CYAN}📁 Using terraform directory: ${TERRAFORM_PERSISTENT_DIR}${NC}"

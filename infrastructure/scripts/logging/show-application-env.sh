@@ -15,7 +15,7 @@ NC='\033[0m' # No Color
 
 # ✅ FIXED: Go up TWO levels to reach project root
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(dirname "$(dirname "$SCRIPT_DIR")")"
+PROJECT_ROOT="$(git rev-parse --show-toplevel 2>/dev/null)"
 TERRAFORM_APP_DIR="$PROJECT_ROOT/infrastructure/terraform/application"
 
 echo -e "${CYAN}📁 Using terraform directory: ${TERRAFORM_APP_DIR}${NC}"

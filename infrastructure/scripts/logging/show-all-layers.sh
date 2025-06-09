@@ -16,7 +16,7 @@ NC='\033[0m' # No Color
 
 # Configuration
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(dirname "$(dirname "$SCRIPT_DIR")")"  # 2 dirname = cloud-resume-challenge/
+PROJECT_ROOT="$(git rev-parse --show-toplevel 2>/dev/null)"   
 LOGS_DIR="$PROJECT_ROOT/logs"
 TIMESTAMP=$(date +"%Y%m%d-%H%M%S")
 LOG_FILE="$LOGS_DIR/infrastructure-overview-$TIMESTAMP.log"
