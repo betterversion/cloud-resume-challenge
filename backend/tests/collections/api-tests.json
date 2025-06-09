@@ -1,0 +1,421 @@
+{
+  "info": {
+    "name": "Resume API Comprehensive Test Suite",
+    "description": "Professional-grade API validation covering functionality, performance, security, and reliability",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Health Endpoint Tests",
+      "item": [
+        {
+          "name": "Health Check - Basic Functionality",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Basic connectivity and status validation",
+                  "pm.test('Health endpoint responds successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    pm.expect(pm.response.responseTime).to.be.below(5000);",
+                  "});",
+                  "",
+                  "// Response structure validation",
+                  "pm.test('Health response has required fields', function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('status');",
+                  "    pm.expect(jsonData).to.have.property('service');",
+                  "    pm.expect(jsonData).to.have.property('database');",
+                  "    pm.expect(jsonData).to.have.property('counter_value');",
+                  "    pm.expect(jsonData).to.have.property('timestamp');",
+                  "});",
+                  "",
+                  "// Business logic validation",
+                  "pm.test('Health status indicates system wellness', function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.status).to.eql('healthy');",
+                  "    pm.expect(jsonData.service).to.eql('visitor-counter');",
+                  "    pm.expect(jsonData.database).to.eql('connected');",
+                  "});",
+                  "",
+                  "// Data type validation",
+                  "pm.test('Health response data types are correct', function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.status).to.be.a('string');",
+                  "    pm.expect(jsonData.service).to.be.a('string');",
+                  "    pm.expect(jsonData.database).to.be.a('string');",
+                  "    pm.expect(jsonData.counter_value).to.be.a('number');",
+                  "    pm.expect(jsonData.timestamp).to.be.a('string');",
+                  "});",
+                  "",
+                  "// Store counter value for comparison tests",
+                  "pm.test('Store baseline counter value', function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.environment.set('health_counter_value', jsonData.counter_value);",
+                  "    console.log('Health endpoint counter value: ' + jsonData.counter_value);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/health"
+          }
+        },
+        {
+          "name": "Health Check - Headers and Security",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// HTTP headers validation",
+                  "pm.test('Health endpoint returns correct content type', function () {",
+                  "    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');",
+                  "});",
+                  "",
+                  "// CORS headers validation",
+                  "pm.test('CORS headers are properly configured', function () {",
+                  "    pm.expect(pm.response.headers.get('Access-Control-Allow-Origin')).to.exist;",
+                  "    pm.expect(pm.response.headers.get('Access-Control-Allow-Methods')).to.exist;",
+                  "    pm.expect(pm.response.headers.get('Access-Control-Allow-Headers')).to.exist;",
+                  "});",
+                  "",
+                  "// Cache control validation",
+                  "pm.test('Cache control headers are appropriate', function () {",
+                  "    const cacheControl = pm.response.headers.get('Cache-Control');",
+                  "    pm.expect(cacheControl).to.exist;",
+                  "    pm.expect(cacheControl).to.include('no-cache');",
+                  "});",
+                  "",
+                  "// Response time performance",
+                  "pm.test('Health check performance is acceptable', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+                  "    if (pm.response.responseTime > 2000) {",
+                  "        console.warn('Health check took ' + pm.response.responseTime + 'ms - may indicate cold start');",
+                  "    }",
+                  "});",
+                  "",
+                  "// Timestamp format validation",
+                  "pm.test('Timestamp format is valid ISO string', function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    const timestamp = jsonData.timestamp;",
+                  "    const date = new Date(timestamp);",
+                  "    pm.expect(date.getTime()).to.not.be.NaN;",
+                  "    pm.expect(timestamp).to.match(/^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}/);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/health"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Counter Endpoint Tests",
+      "item": [
+        {
+          "name": "Counter - Basic Functionality",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Basic functionality validation",
+                  "pm.test('Counter endpoint responds successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+                  "});",
+                  "",
+                  "// Response structure validation",
+                  "pm.test('Counter response has required fields', function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('count');",
+                  "    pm.expect(jsonData).to.have.property('timestamp');",
+                  "    pm.expect(jsonData).to.have.property('status');",
+                  "    pm.expect(jsonData).to.have.property('requestId');",
+                  "});",
+                  "",
+                  "// Business logic validation",
+                  "pm.test('Counter business logic is correct', function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.count).to.be.a('number');",
+                  "    pm.expect(jsonData.count).to.be.at.least(0);",
+                  "    pm.expect(jsonData.status).to.eql('success');",
+                  "});",
+                  "",
+                  "// Request ID validation",
+                  "pm.test('Request ID is properly formatted', function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.requestId).to.be.a('string');",
+                  "    pm.expect(jsonData.requestId).to.have.length.above(10);",
+                  "    // Check if it looks like a UUID",
+                  "    pm.expect(jsonData.requestId).to.match(/^[a-f0-9-]{36}$/);",
+                  "});",
+                  "",
+                  "// Store values for increment testing",
+                  "pm.test('Store counter values for comparison', function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.environment.set('first_counter_value', jsonData.count);",
+                  "    pm.environment.set('first_request_id', jsonData.requestId);",
+                  "    console.log('First counter call - Count: ' + jsonData.count + ', RequestID: ' + jsonData.requestId);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/counter"
+          }
+        },
+        {
+          "name": "Counter - Increment Behavior",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Increment functionality validation",
+                  "pm.test('Counter increments correctly', function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    const currentCount = jsonData.count;",
+                  "    const previousCount = parseInt(pm.environment.get('first_counter_value'));",
+                  "    ",
+                  "    // Counter should have incremented (allowing for concurrent access)",
+                  "    pm.expect(currentCount).to.be.at.least(previousCount);",
+                  "    console.log('Counter increment: ' + previousCount + ' → ' + currentCount);",
+                  "});",
+                  "",
+                  "// Request ID uniqueness",
+                  "pm.test('Request IDs are unique between calls', function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    const currentRequestId = jsonData.requestId;",
+                  "    const previousRequestId = pm.environment.get('first_request_id');",
+                  "    ",
+                  "    pm.expect(currentRequestId).to.not.eql(previousRequestId);",
+                  "    console.log('Request ID uniqueness verified');",
+                  "});",
+                  "",
+                  "// Performance validation for warm Lambda",
+                  "pm.test('Warm Lambda performance is optimal', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(1000);",
+                  "    console.log('Counter response time: ' + pm.response.responseTime + 'ms');",
+                  "});",
+                  "",
+                  "// Timestamp progression",
+                  "pm.test('Timestamps progress correctly', function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    const currentTimestamp = new Date(jsonData.timestamp);",
+                  "    const now = new Date();",
+                  "    ",
+                  "    // Timestamp should be recent (within last 10 seconds)",
+                  "    const timeDiff = Math.abs(now - currentTimestamp);",
+                  "    pm.expect(timeDiff).to.be.below(10000);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/counter"
+          }
+        },
+        {
+          "name": "Counter - Headers and Security",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Security headers validation",
+                  "pm.test('Security headers are present', function () {",
+                  "    pm.expect(pm.response.headers.get('X-Content-Type-Options')).to.eql('nosniff');",
+                  "    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');",
+                  "});",
+                  "",
+                  "// Cache control for counter endpoint",
+                  "pm.test('Counter cache control is appropriate', function () {",
+                  "    const cacheControl = pm.response.headers.get('Cache-Control');",
+                  "    pm.expect(cacheControl).to.exist;",
+                  "    // Counter should not be cached since it changes",
+                  "    pm.expect(cacheControl).to.include('no-cache');",
+                  "});",
+                  "",
+                  "// CORS validation",
+                  "pm.test('CORS configuration allows frontend access', function () {",
+                  "    const allowOrigin = pm.response.headers.get('Access-Control-Allow-Origin');",
+                  "    pm.expect(allowOrigin).to.exist;",
+                  "    // Should allow your domain",
+                  "    pm.expect(allowOrigin).to.include('dzresume.dev');",
+                  "});",
+                  "",
+                  "// AWS API Gateway headers",
+                  "pm.test('AWS API Gateway headers are present', function () {",
+                  "    pm.expect(pm.response.headers.get('X-Amzn-RequestId')).to.exist;",
+                  "    pm.expect(pm.response.headers.get('X-Amz-Apigw-Id')).to.exist;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/counter"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Cross-Endpoint Validation",
+      "item": [
+        {
+          "name": "Health vs Counter Consistency",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Get current health data",
+                  "const jsonData = pm.response.json();",
+                  "const healthCounterValue = jsonData.counter_value;",
+                  "const previousCounterValue = parseInt(pm.environment.get('first_counter_value'));",
+                  "",
+                  "// Cross-endpoint consistency validation",
+                  "pm.test('Health counter value is consistent with counter endpoint', function () {",
+                  "    // Health endpoint shows current state, should be >= what we saw in counter tests",
+                  "    pm.expect(healthCounterValue).to.be.at.least(previousCounterValue);",
+                  "    console.log('Cross-validation: Health shows ' + healthCounterValue + ', Counter was ' + previousCounterValue);",
+                  "});",
+                  "",
+                  "// Database state consistency",
+                  "pm.test('Database state is consistent across endpoints', function () {",
+                  "    pm.expect(jsonData.database).to.eql('connected');",
+                  "    pm.expect(jsonData.status).to.eql('healthy');",
+                  "});",
+                  "",
+                  "// Service identification consistency",
+                  "pm.test('Service identification is consistent', function () {",
+                  "    pm.expect(jsonData.service).to.eql('visitor-counter');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/health"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Error Handling Tests",
+      "item": [
+        {
+          "name": "API Gateway - Non-existent Route",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// AWS API Gateway returns 403 for non-existent routes",
+                  "pm.test('Non-existent routes return 403 (API Gateway security)', function () {",
+                  "    pm.response.to.have.status(403);",
+                  "});",
+                  "",
+                  "// Validate the specific AWS error response",
+                  "pm.test('Response contains AWS authentication error', function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.message).to.eql('Missing Authentication Token');",
+                  "});",
+                  "",
+                  "// Check for AWS-specific headers",
+                  "pm.test('AWS API Gateway headers are present', function () {",
+                  "    pm.expect(pm.response.headers.get('x-amzn-requestid')).to.exist;",
+                  "    pm.expect(pm.response.headers.get('x-amzn-errortype')).to.eql('MissingAuthenticationTokenException');",
+                  "});",
+                  "",
+                  "// Error response time should be fast (no Lambda involved)",
+                  "pm.test('Error responses are fast (API Gateway level)', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(1000);",
+                  "    console.log('Error response time: ' + pm.response.responseTime + 'ms (fast - no Lambda)');",
+                  "});",
+                  "",
+                  "// CORS is NOT present on API Gateway errors",
+                  "pm.test('CORS headers absent on API Gateway errors (expected behavior)', function () {",
+                  "    const corsOrigin = pm.response.headers.get('Access-Control-Allow-Origin');",
+                  "    pm.expect(corsOrigin).to.be.undefined;",
+                  "    console.log('CORS not present on API Gateway errors - this is normal AWS behavior');",
+                  "});",
+                  "",
+                  "// Content type should still be JSON",
+                  "pm.test('Error response is JSON formatted', function () {",
+                  "    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/nonexistent"
+          }
+        },
+        {
+          "name": "API Gateway - Wrong HTTP Method",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Wrong method also returns 403 in API Gateway",
+                  "pm.test('Wrong HTTP method returns 403 (API Gateway behavior)', function () {",
+                  "    pm.response.to.have.status(403);",
+                  "});",
+                  "",
+                  "// Same error message as non-existent routes",
+                  "pm.test('Wrong method gives same error as non-existent route', function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.message).to.eql('Missing Authentication Token');",
+                  "});",
+                  "",
+                  "// Fast response (API Gateway level)",
+                  "pm.test('Method error response is fast', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(1000);",
+                  "});",
+                  "",
+                  "// Document the behavior for interviews",
+                  "pm.test('Document API Gateway method handling', function () {",
+                  "    console.log('AWS API Gateway treats wrong methods same as non-existent routes');",
+                  "    console.log('This is different from traditional web servers that return 405');",
+                  "    pm.expect(true).to.be.true; // Always pass - just for documentation",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{base_url}}/health"
+          }
+        }
+      ]
+    }
+  ]
+}

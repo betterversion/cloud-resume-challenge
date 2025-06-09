@@ -122,16 +122,6 @@ jobs:
             npm test
             echo "✅ All frontend unit tests passed"
 
-        - name: Test summary
-          if: always()
-          run: |
-            if [ $? -eq 0 ]; then
-              echo "🎉 Unit tests: PASSED" >> $GITHUB_STEP_SUMMARY
-            else
-              echo "❌ Unit tests: FAILED" >> $GITHUB_STEP_SUMMARY
-              exit 1
-            fi
-
   build-deploy-frontend:
     name: 🎨 Build & Deploy Frontend
     runs-on: ubuntu-latest
@@ -293,23 +283,67 @@ jobs:
             exit 1
           fi
 
+  test-api-endpoints:
+      name: 🧪 API Validation
+      runs-on: ubuntu-latest
+      needs: [deploy-backend, test-backend-deployment, determine-environment]
+      if: needs.test-backend-deployment.result == 'success'
+      steps:
+        - name: Checkout
+          uses: actions/checkout@v4
+
+        - name: Test APIs
+          uses: SimonScholz/postman-newman-action@main
+          with:
+            collection: backend/tests/collections/api-tests.json
+            environment: backend/tests/environments/${{ needs.determine-environment.outputs.environment }}.json
+            reporters: 'cli'
+            bail: failure
+            timeoutRequest: 10000
+
   summary:
     name: 📊 Deployment Summary
     runs-on: ubuntu-latest
-    needs: [determine-environment, verify-frontend-deployment, test-backend-deployment]
+    needs: [determine-environment, verify-frontend-deployment, test-backend-deployment, test-api-endpoints]
     if: always()
     steps:
-    - name: Summary
-      run: |
-        echo "🚀 Staging: ${{ needs.determine-environment.outputs.environment }} v${{ needs.determine-environment.outputs.version }}"
-        echo ""
-        echo "Frontend: ${{ needs.verify-frontend-deployment.result || 'skipped' }}"
-        echo "Backend: ${{ needs.test-backend-deployment.result || 'skipped' }}"
-        echo ""
-        if [[ "${{ needs.verify-frontend-deployment.result }}" == "success" && "${{ needs.test-backend-deployment.result }}" == "success" ]]; then
-          echo "✅ Ready for production: https://test.dzresume.dev"
-        elif [[ "${{ needs.verify-frontend-deployment.result }}" == "skipped" && "${{ needs.test-backend-deployment.result }}" == "skipped" ]]; then
-          echo "⚠️  No deployments executed"
-        else
-          echo "❌ Fix issues before promotion"
-        fi
+      - name: Summary
+        run: |
+          ENV_NAME="${{ needs.determine-environment.outputs.environment }}"
+          VERSION="${{ needs.determine-environment.outputs.version }}"
+          FRONTEND="${{ needs.verify-frontend-deployment.result || 'skipped' }}"
+          BACKEND="${{ needs.test-backend-deployment.result || 'skipped' }}"
+          API="${{ needs.test-api-endpoints.result || 'skipped' }}"
+
+          # CLI Output
+          echo "🚀 Staging: $ENV_NAME v$VERSION"
+          echo ""
+          echo "Frontend: $FRONTEND"
+          echo "Backend: $BACKEND"
+          echo "API Tests: $API"
+          echo ""
+
+          # GitHub Summary
+          echo "# 🚀 Staging: $ENV_NAME $VERSION" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Frontend:** $FRONTEND | **Backend:** $BACKEND | **API Tests:** $API" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Simple Decision Logic
+          if [[ "$FRONTEND" == "success" || "$FRONTEND" == "skipped" ]] &&
+            [[ "$BACKEND" == "success" || "$BACKEND" == "skipped" ]] &&
+            [[ "$API" == "success" || "$API" == "skipped" ]]; then
+
+            if [[ "$FRONTEND" == "success" || "$BACKEND" == "success" ]]; then
+              echo "✅ Ready for production: https://test.dzresume.dev"
+              echo "## ✅ Ready for Production" >> $GITHUB_STEP_SUMMARY
+              echo "**Staging:** https://test.dzresume.dev" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "⚠️  No deployments executed"
+              echo "## ⚠️ No Changes Deployed" >> $GITHUB_STEP_SUMMARY
+            fi
+          else
+            echo "❌ Fix issues before promotion"
+            echo "## ❌ Issues Found - Not Ready" >> $GITHUB_STEP_SUMMARY
+            exit 1
+          fi

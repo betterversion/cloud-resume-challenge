@@ -44,3 +44,6 @@ yarn-error.log*
 
 # Hugo build output
 public/
+
+#Postman Reports
+backend/tests/reports

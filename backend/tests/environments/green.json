@@ -1,0 +1,29 @@
+{
+  "name": "Green Environment",
+  "values": [
+    {
+      "key": "base_url",
+      "value": "https://js2yf050o4.execute-api.us-east-1.amazonaws.com/green",
+      "enabled": true,
+      "type": "default"
+    },
+    {
+      "key": "environment_name",
+      "value": "green",
+      "enabled": true,
+      "type": "default"
+    },
+    {
+      "key": "max_response_time_cold",
+      "value": "5000",
+      "enabled": true,
+      "type": "default"
+    },
+    {
+      "key": "max_response_time_warm",
+      "value": "1000",
+      "enabled": true,
+      "type": "default"
+    }
+  ]
+}
