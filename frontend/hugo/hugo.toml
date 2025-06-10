@@ -50,7 +50,8 @@ devicons = [
   "dotnetcore", "amazonwebservices", "docker",
   "ansible", "csharp", "grafana", "selenium",
   "powershell", "postman", "jetbrains", "k6",
-  "elasticsearch"
+  "elasticsearch", "terraform", "packer",
+  "kubernetes", "github", "cypressio", "prometheus"
 ]
 
 # ═══════════════════════════════════════════════════════════════

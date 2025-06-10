@@ -1,20 +1,20 @@
 [
-    {
-        "role": "SDET III (Infrastructure & DevOps Focus)",
-        "company": "Zillow",
-        "range": "2021.10 - 2025.02",
-        "summary": "**Cloud Infrastructure & Migration**\n- Modernized legacy .NET systems to AWS cloud-native architecture, maintaining 99.95% uptime for 2M+ transactions/mo\n- Containerized test environments using Docker (8h → 20m provisioning)\n- Designed self-healing infrastructure with Ansible automation\n\n**CI/CD Pipeline Architecture**\n- Architected enterprise CI/CD framework (TeamCity/Ansible) adopted by 7 teams\n- Reduced pipeline setup time from days → hours via reusable templates\n- Implemented parallel test execution (60m → 36m runtime)\n- Automated 90% of test data management workflows\n\n**Developer Enablement & SRE**\n- Built self-service tools reducing developer dependencies by 70%\n- Created Grafana/ELK monitoring for 50+ API endpoints\n- Developed PowerShell utilities for health checks\n\n**Leadership & Optimization**\n- Mentored 5 engineers in infrastructure-as-code practices\n- Led AWS migration cutting environment costs by 40%\n- Reduced production incidents by 65% post-migration"
-      },
-      {
-        "role": "QA Automation Engineer",
-        "company": "ShowingTime",
-        "range": "2018.08 - 2021.10",
-        "summary": "**Test Automation**\n- Built Selenium WebDriver framework with 75% lower maintenance\n- Automated 150+ API scenarios with RestSharp/.NET\n- Slashed regression time from 2h → 25m\n\n**Process Leadership**\n- Managed CI/CD pipelines (Jenkins/AWS)\n- Created PowerShell scripts for bug tracking\n- Introduced end-to-end testing workflows\n\n**Team Scaling**\n- Led 8-10 projects/release with offshore teams\n- Improved dev/test collaboration through process changes"
-      },
-      {
-        "role": "QA Analyst",
-        "company": "Infomatrix Global",
-        "range": "2016.05 - 2018.07",
-        "summary": "**Testing Foundations**\n- Reduced iteration windows from 2 weeks → 6-7 days via smoke testing\n- Executed 1000+ test cases across functional/mobile/performance\n- Bridged communication between engineering and stakeholders"
-      }
-    ]
+  {
+    "role": "Automation Engineer / SDET III",
+    "company": "Zillow",
+    "range": "2021.10 - 2025.02",
+    "summary": "**Infrastructure Automation & Cloud Migration**\n- Led automation strategy for scheduling infrastructure modernization, migrating legacy .NET monoliths to AWS cloud-native architecture\n- Architected self-healing infrastructure with Ansible, achieving 99.95% uptime for systems processing 2M+ monthly transactions\n- Automated environment provisioning with Docker, reducing setup time from 8 hours to 20 minutes\n- Designed infrastructure monitoring solution with Grafana/ELK Stack covering 50+ API endpoints\n\n**Platform Engineering & CI/CD**\n- Built enterprise CI/CD automation framework (TeamCity/Ansible) adopted as standard by 7 teams\n- Created reusable pipeline templates and automation tools, cutting setup time from days to hours\n- Developed self-service platforms enabling developers to manage their own deployments and diagnostics\n- Automated infrastructure workflows reducing manual operations by 90%\n\n**Cost Optimization & Performance**\n- Led automation initiatives in AWS migration, achieving 40% infrastructure cost reduction\n- Optimized system performance through automated load testing and parallel execution strategies\n- Reduced production incidents by 65% through proactive automation and monitoring\n\n**Technical Leadership**\n- Mentored 5 engineers in infrastructure-as-code and automation best practices\n- Introduced PowerShell and Python automation tools for system health monitoring\n- Championed automation-first culture, transforming manual processes across the organization"
+  },
+  {
+    "role": "QA Automation Engineer",
+    "company": "ShowingTime",
+    "range": "2018.08 - 2021.10",
+    "summary": "**Test Automation**\n- Built Selenium WebDriver framework with 75% lower maintenance\n- Automated 150+ API scenarios with RestSharp/.NET\n- Slashed regression time from 2h → 25m\n\n**Process Leadership**\n- Managed CI/CD pipelines (Jenkins/AWS)\n- Created PowerShell scripts for bug tracking\n- Introduced end-to-end testing workflows\n\n**Team Scaling**\n- Led 8-10 projects/release with offshore teams\n- Improved dev/test collaboration through process changes"
+  },
+  {
+    "role": "QA Analyst",
+    "company": "Infomatrix Global",
+    "range": "2016.05 - 2018.07",
+    "summary": "**Testing Foundations**\n- Reduced iteration windows from 2 weeks → 6-7 days via smoke testing\n- Executed 1000+ test cases across functional/mobile/performance\n- Bridged communication between engineering and stakeholders"
+  }
+]
