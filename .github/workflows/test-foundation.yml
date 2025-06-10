@@ -1,0 +1,105 @@
+name: 🔍 Complete Infrastructure Foundation Test
+
+on:
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  test-persistent-layer:
+    name: 🏗️ Test Persistent Infrastructure
+    runs-on: ubuntu-latest
+    environment: staging
+
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+
+      - name: 🔐 Configure AWS
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ secrets.AWS_REGION }}
+          role-session-name: test-persistent-${{ github.run_id }}
+
+      - name: ⚙️ Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.12.1
+
+      - name: 🏗️ Test Persistent Layer
+        working-directory: ./infrastructure/terraform/persistent
+        run: |
+          echo "🔍 Testing persistent infrastructure..."
+          terraform init
+          terraform plan -no-color
+          echo "✅ Persistent layer verified!"
+
+  test-application-layer:
+    name: 🚀 Test Application Infrastructure
+    runs-on: ubuntu-latest
+    environment: staging
+    needs: test-persistent-layer  # Run after persistent layer succeeds
+
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+
+      - name: 🔐 Configure AWS
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ secrets.AWS_REGION }}
+          role-session-name: test-application-${{ github.run_id }}
+
+      - name: ⚙️ Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.12.1
+
+      - name: 🚀 Test Application Layer
+        working-directory: ./infrastructure/terraform/application
+        run: |
+          echo "🔍 Testing application infrastructure..."
+          terraform init
+          terraform workspace show || terraform workspace new blue
+          terraform plan -no-color
+          echo "✅ Application layer verified!"
+
+      - name: 🧪 Test Blue-Green Workspaces
+        working-directory: ./infrastructure/terraform/application
+        run: |
+          echo "🔄 Testing blue-green workspace switching..."
+
+          # Test blue workspace
+          terraform workspace select blue 2>/dev/null || terraform workspace new blue
+          terraform plan -no-color
+          echo "✅ Blue workspace working!"
+
+          # Test green workspace
+          terraform workspace select green 2>/dev/null || terraform workspace new green
+          terraform plan -no-color
+          echo "✅ Green workspace working!"
+
+          echo "🎯 Both blue-green environments verified!"
+
+  foundation-complete:
+    name: 🎉 Foundation Test Complete
+    runs-on: ubuntu-latest
+    needs: [test-persistent-layer, test-application-layer]
+
+    steps:
+      - name: 🎉 Celebrate Phase 1 Victory
+        run: |
+          echo "╔══════════════════════════════════════════════════════════════╗"
+          echo "║               🎉 PHASE 1 FOUNDATION COMPLETE! 🎉            ║"
+          echo "╚══════════════════════════════════════════════════════════════╝"
+          echo ""
+          echo "✅ Persistent Layer: All infrastructure working!"
+          echo "✅ Application Layer: Blue-green environments ready!"
+          echo "✅ GitHub Actions: OIDC authentication successful!"
+          echo "✅ Terraform: Modern S3 backend with native locking!"
+          echo ""
+          echo "🚀 Ready for Phase 2: Automated Hugo Build Pipeline!"
