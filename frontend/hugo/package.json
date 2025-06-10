@@ -5,12 +5,19 @@
   "main": "index.js",
   "scripts": {
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "serve": "cross-env HUGO_ENV=blue hugo serve --port 1580 --baseURL=http://localhost:1580",
+    "build": "cross-env HUGO_ENV=blue hugo --minify --environment=blue",
+    "test:e2e:local": "concurrently \"npm run serve\" \"npx wait-on http://localhost:1580 && cypress run --config baseUrl=http://localhost:1580\" --kill-others --success first"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "vitest": "^3.2.2"
+    "concurrently": "^9.1.2",
+    "cross-env": "^7.0.3",
+    "cypress": "^14.4.1",
+    "vitest": "^3.2.2",
+    "wait-on": "^8.0.3"
   }
 }

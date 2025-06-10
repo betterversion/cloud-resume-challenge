@@ -102,8 +102,8 @@ def get_cors_origin(event):
     allowed_origins = [
         'https://www.dzresume.dev',
         'https://dzresume.dev',
-        'http://localhost:1313',
-        'http://127.0.0.1:1313',
+        'http://localhost:1580',
+        'http://127.0.0.1:1580',
         'https://test.dzresume.dev'
     ]
 

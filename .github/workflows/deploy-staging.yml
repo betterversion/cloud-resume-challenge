@@ -301,10 +301,49 @@ jobs:
             bail: failure
             timeoutRequest: 10000
 
+  cypress-test:
+    name: 🧪 Cypress E2E Tests
+    runs-on: ubuntu-latest
+    needs:
+      - build-deploy-frontend
+      - test-api-endpoints
+      - test-backend-deployment
+      - verify-frontend-deployment
+      - determine-environment
+    if: >
+      needs.verify-frontend-deployment.result == 'success' &&
+      needs.test-api-endpoints.result == 'success'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: 🧪 Run Cypress Tests
+        uses: cypress-io/github-action@v6
+        with:
+          working-directory: frontend/hugo
+          headed: false
+
+      - name: 📊 Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cypress-results-${{ github.run_number }}
+          path: |
+            frontend/hugo/cypress/screenshots
+            frontend/hugo/cypress/videos
+          retention-days: 3
+
+      - name: ✅ Test Summary
+        if: always()
+        run: |
+          echo "🎯 Cypress E2E Test Results"
+          echo "Status: ${{ job.status }}"
+
+
   summary:
     name: 📊 Deployment Summary
     runs-on: ubuntu-latest
-    needs: [determine-environment, verify-frontend-deployment, test-backend-deployment, test-api-endpoints]
+    needs: [determine-environment, verify-frontend-deployment, test-backend-deployment, test-api-endpoints, cypress-test]
     if: always()
     steps:
       - name: Summary

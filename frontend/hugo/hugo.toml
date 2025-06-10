@@ -7,6 +7,7 @@ baseURL = "https://dzresume.dev/"
 languageCode = "en-us"
 title = "Dmitriy Zhernoviy - Cloud Engineer"
 theme = "hugo-resume"
+port = 1580
 
 # ═══════════════════════════════════════════════════════════════
 # 🎯 CORE THEME PARAMETERS
@@ -20,6 +21,7 @@ lastName = "Zhernoviy"
 address = "Denver, CO"
 phone = "503-660-3010"
 email = "dmitriy.z.tech@gmail.com"
+email_obfuscation = false
 profileImage = "img/profile.jpg"
 
 # Theme-required content
@@ -33,7 +35,7 @@ favicon = "/favicon.ico"
 
 # Theme-required feature toggles
 showQRCode = true
-showContact = true
+showContact = false
 showSummary = true
 showSkills = true
 showEducation = true
@@ -42,7 +44,7 @@ showOpenSource = true
 showProjects = true
 showCertifications = true
 showSocializations = true
-sections = ["skills", "experience", "education"]
+sections = ["skills", "experience", "education", "contact"]
 devicons = ["selenium", "postman", "aws", "docker", "jenkins", "ansible"]
 
 # ═══════════════════════════════════════════════════════════════

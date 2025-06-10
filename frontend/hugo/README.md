@@ -1,3 +1,6 @@
+[![Deploy Staging](https://github.com/betterversion/cloud-resume-challenge/actions/workflows/deploy-staging.yml/badge.svg)](https://github.com/betterversion/cloud-resume-challenge/actions/workflows/deploy-staging.yml)
+
+
 # 🌟 Cloud Resume Challenge - Hugo Frontend
 
 Professional resume site built with Hugo, deployed via AWS S3 + CloudFront.
