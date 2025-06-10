@@ -4,18 +4,31 @@ date: 2025-05-26
 draft: false
 ---
 
-## Cloud Infrastructure Engineer & DevOps Specialist
+## Cloud Infrastructure & Automation Engineer
 
-Results-driven SDET with 7+ years modernizing enterprise systems and building cloud-native infrastructure. Currently architecting AWS solutions at Zillow, where I've led migrations serving 2M+ monthly transactions while reducing costs by 40% and achieving 99.95% uptime.
+Automation engineer transitioning to cloud infrastructure after architecting platforms at scale. At Zillow, I evolved from SDET to building CI/CD frameworks used by 7 teams and contributing to AWS migrations that cut costs by 40% while serving 2M+ monthly transactions.
 
-### Technical Leadership & Impact
-- **AWS Cloud Architecture**: Designed and implemented cloud-native solutions replacing legacy .NET systems
-- **Infrastructure Automation**: Built self-healing infrastructure with Ansible, reducing manual intervention by 90%
-- **CI/CD Excellence**: Created enterprise frameworks adopted across 7 teams, cutting deployment time from days to hours
-- **Cost Optimization**: Led cloud migrations achieving 40% infrastructure cost reduction
-- **Developer Enablement**: Built self-service tools reducing developer dependencies by 70%
+### What Makes Me Different
 
-### Current Focus
-Expanding cloud engineering expertise through AWS SAA-C03 certification and hands-on projects. Passionate about infrastructure as code, serverless architectures, and building resilient, scalable systems.
+**I build infrastructure that scales** - not just tests that pass. My background in automation means I approach cloud engineering with a unique perspective: every system should be self-healing, every deployment should be automated, and every dollar should be optimized.
 
-Ready to bring proven DevOps experience and systematic problem-solving approach to cloud engineering challenges.
+**Technical Expertise**
+- **Infrastructure as Code**: Terraform, Ansible, CloudFormation
+- **Cloud Platforms**: AWS (Lambda, API Gateway, DynamoDB, CloudFront)
+- **Automation**: CI/CD with GitHub Actions, Python, Bash
+- **Containers**: Docker, Kubernetes fundamentals
+
+### This Site Proves It
+
+While this resume appears deceptively simple, it runs on production-grade infrastructure I built from scratch:
+
+- **True blue-green deployments** enabling zero-downtime releases
+- **2,000+ lines of Terraform** managing 30+ AWS resources
+- **Enterprise patterns** at <$5/month operational cost
+- **10-minute deployments** from code to production
+
+This isn't a tutorial project - it's how I approach infrastructure. The same patterns powering this site have served millions at Zillow.
+
+[Architecture Diagram] | [View Infrastructure Code]
+
+**Ready to discuss** how I can bring this infrastructure mindset to your engineering challenges.
