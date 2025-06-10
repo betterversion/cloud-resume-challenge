@@ -1,0 +1,40 @@
+<section class="resume-section p-3 p-lg-5 d-flex flex-column" id="skills">
+  <div class="my-auto" id="skills-content">
+    <h2 class="mb-5">{{ i18n "skills" }}</h2>
+
+    {{ $data := $.Data }}
+    {{ range $data.skills }}
+      <div class="subheading mb-3 skills-heading">{{ .grouping }}</div>
+      <ul>
+        {{ range .skills }}
+          {{ if isset . "name" }}
+            <li class="list-inline-item">
+
+              {{ if .icon }}
+                {{ $devicon := cond (in site.Params.devicons (lower .icon)) (lower .icon) "bash" }}
+
+                <!-- FIXED: Proper template logic using cond function -->
+                {{ $style := cond (or (eq $devicon "selenium") (eq $devicon "k6")) "original" "plain" }}
+
+                <i class="devicon-{{ $devicon }}-{{ $style }}" style="color: #BD5D38; font-size: 1.5rem; margin-right: 0.5rem;"></i>
+              {{ else }}
+                <i class="devicon-bash-plain" style="color: #BD5D38; font-size: 1.5rem; margin-right: 0.5rem;"></i>
+              {{ end }}
+
+              {{ if isset . "link" }}
+                <a href="{{ .link }}">{{ .name }}</a>
+              {{ else }}
+                {{ .name }}
+              {{ end }}
+            </li>
+          {{ else }}
+            <li class="list-inline-item">
+              <i class="devicon-bash-plain" style="color: #BD5D38; font-size: 1.5rem; margin-right: 0.5rem;"></i>
+              {{ . }}
+            </li>
+          {{ end }}
+        {{ end }}
+      </ul>
+    {{ end }}
+  </div>
+</section>

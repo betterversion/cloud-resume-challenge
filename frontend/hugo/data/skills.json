@@ -1,41 +1,65 @@
 [
-    {
-      "grouping": "Test Automation & Tools",
-      "skills": [
-        {"name": "Selenium", "icon": "selenium"},
-        {"name": "Playwright", "icon": "playwright"},
-        {"name": "nUnit", "icon": "nunit"},
-        {"name": "Postman", "link": "https://postman.com"},
-        {"name": "RestSharp", "link": "https://restsharp.dev"}
-      ]
-    },
-    {
-      "grouping": "CI/CD & Cloud",
-      "skills": [
-        {"name": "TeamCity", "icon": "teamcity"},
-        {"name": "Jenkins", "icon": "jenkins"},
-        {"name": "AWS", "icon": "aws", "link": "https://aws.amazon.com"},
-        {"name": "Docker", "icon": "docker", "link": "https://docker.com"},
-        {"name": "Ansible", "icon": "ansible"}
-      ]
-    },
-    {
-      "grouping": "Programming Languages",
-      "skills": [
-        {"name": "C#", "icon": "csharp"},
-        {"name": "JavaScript", "icon": "javascript"},
-        {"name": "Python", "icon": "python"},
-        {"name": "PowerShell", "icon": "powershell"},
-        {"name": "Bash", "icon": "bash"}
-      ]
-    },
-    {
-      "grouping": "Performance & Monitoring",
-      "skills": [
-        {"name": "K6", "link": "https://k6.io"},
-        {"name": "Grafana", "icon": "grafana"},
-        {"name": "ElasticSearch", "icon": "elasticsearch"},
-        {"name": "AllureReport", "icon": "report"}
-      ]
-    }
-  ]
+  {
+    "grouping": "Test Automation & Tools",
+    "skills": [
+      { "name": "Selenium", "icon": "selenium" },
+      {
+        "name": "Playwright",
+        "link": "https://playwright.dev",
+        "icon": "javascript"
+      },
+      { "name": "nUnit", "icon": "dotnetcore" },
+      { "name": "Postman", "link": "https://postman.com", "icon": "postman" },
+      {
+        "name": "RestSharp",
+        "link": "https://restsharp.dev",
+        "icon": "dotnetcore"
+      }
+    ]
+  },
+  {
+    "grouping": "CI/CD & Cloud",
+    "skills": [
+      {
+        "name": "TeamCity",
+        "link": "https://jetbrains.com/teamcity",
+        "icon": "jetbrains"
+      },
+      { "name": "Jenkins", "icon": "jenkins" },
+      {
+        "name": "AWS",
+        "icon": "amazonwebservices",
+        "link": "https://aws.amazon.com"
+      },
+      { "name": "Docker", "icon": "docker", "link": "https://docker.com" },
+      { "name": "Ansible", "icon": "ansible" }
+    ]
+  },
+  {
+    "grouping": "Programming Languages",
+    "skills": [
+      { "name": "C#", "icon": "csharp" },
+      { "name": "JavaScript", "icon": "javascript" },
+      { "name": "Python", "icon": "python" },
+      {
+        "name": "PowerShell",
+        "link": "https://github.com/PowerShell/PowerShell",
+        "icon": "powershell"
+      },
+      { "name": "Bash", "icon": "bash" }
+    ]
+  },
+  {
+    "grouping": "Performance & Monitoring",
+    "skills": [
+      { "name": "K6", "link": "https://k6.io", "icon": "k6" },
+      { "name": "Grafana", "icon": "grafana" },
+      {
+        "name": "ElasticSearch",
+        "link": "https://elastic.co",
+        "icon": "elasticsearch"
+      },
+      { "name": "AllureReport", "link": "https://qameta.io/allure" }
+    ]
+  }
+]

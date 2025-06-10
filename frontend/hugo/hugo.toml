@@ -45,7 +45,13 @@ showProjects = true
 showCertifications = true
 showSocializations = true
 sections = ["skills", "experience", "education", "contact"]
-devicons = ["selenium", "postman", "aws", "docker", "jenkins", "ansible"]
+devicons = [
+  "jenkins", "javascript", "python", "bash",
+  "dotnetcore", "amazonwebservices", "docker",
+  "ansible", "csharp", "grafana", "selenium",
+  "powershell", "postman", "jetbrains", "k6",
+  "elasticsearch"
+]
 
 # ═══════════════════════════════════════════════════════════════
 # 🚀 DEPLOYMENT CONFIGURATION
