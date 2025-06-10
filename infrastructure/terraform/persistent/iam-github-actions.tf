@@ -15,7 +15,7 @@ resource "aws_iam_role" "github_actions_deploy" {
             "token.actions.githubusercontent.com:aud" = "sts.amazonaws.com"
           },
           StringLike = {
-            "token.actions.githubusercontent.com:sub" = "repo:betterversion-2/cloud-resume-challenge-2:*"
+            "token.actions.githubusercontent.com:sub" = "repo:betterversion/cloud-resume-challenge:*"
           }
         }
       }
