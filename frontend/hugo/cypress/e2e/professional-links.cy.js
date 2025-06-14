@@ -53,7 +53,9 @@ describe("Professional Links Validation", () => {
 
   it("LinkedIn links are configured", () => {
     // LinkedIn icon on about html page
-    cy.get('a[href="#"][data-original-title="LinkedIn"]')
+    cy.get(
+      'a[href="https://www.linkedin.com/in/dmitriy-zhernoviy"][data-original-title="LinkedIn"]'
+    )
       .should("be.visible")
       .and("have.attr", "rel", "me");
 
