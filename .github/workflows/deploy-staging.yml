@@ -371,10 +371,18 @@ jobs:
           # GitHub Summary
           echo "# 🚀 Staging: $ENV_NAME $VERSION" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Frontend:** $FRONTEND | **Backend:** $BACKEND | **API Tests:** $API" | **E2E:** $E2E" >> $GITHUB_STEP_SUMMARY
+          echo "**Frontend:** $FRONTEND | **Backend:** $BACKEND | **API:** $API | **E2E:** $E2E" >> $GITHUB_STEP_SUMMARY
+          #                                                                    ↑ FIXED: Removed extra pipe
           echo "" >> $GITHUB_STEP_SUMMARY
 
-          # Simple Decision Logic
+          # Check for failures and report details
+          FAILED_JOBS=""
+          [[ "$FRONTEND" == "failure" ]] && FAILED_JOBS="$FAILED_JOBS Frontend"
+          [[ "$BACKEND" == "failure" ]] && FAILED_JOBS="$FAILED_JOBS Backend"
+          [[ "$API" == "failure" ]] && FAILED_JOBS="$FAILED_JOBS API-Tests"
+          [[ "$E2E" == "failure" ]] && FAILED_JOBS="$FAILED_JOBS E2E-Tests"
+
+          # Decision Logic with better error reporting
           if [[ "$FRONTEND" == "success" || "$FRONTEND" == "skipped" ]] &&
             [[ "$BACKEND" == "success" || "$BACKEND" == "skipped" ]] &&
             [[ "$API" == "success" || "$API" == "skipped" ]] &&
@@ -390,6 +398,11 @@ jobs:
             fi
           else
             echo "❌ Fix issues before promotion"
+            echo "Failed jobs:$FAILED_JOBS"
+            echo ""
             echo "## ❌ Issues Found - Not Ready" >> $GITHUB_STEP_SUMMARY
+            echo "**Failed Jobs:**$FAILED_JOBS" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Action Required:** Fix failing tests before production promotion" >> $GITHUB_STEP_SUMMARY
             exit 1
           fi
