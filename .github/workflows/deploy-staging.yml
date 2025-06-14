@@ -310,9 +310,13 @@ jobs:
       - test-backend-deployment
       - verify-frontend-deployment
       - determine-environment
+    # Only run E2E tests if nothing failed and at least one deployment succeeded
     if: >
-      needs.verify-frontend-deployment.result == 'success' &&
-      needs.test-api-endpoints.result == 'success'
+      needs.verify-frontend-deployment.result != 'failure' &&
+      needs.test-backend-deployment.result != 'failure' &&
+      needs.test-api-endpoints.result != 'failure' &&
+      (needs.verify-frontend-deployment.result == 'success' ||
+      needs.test-backend-deployment.result == 'success')
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -353,6 +357,7 @@ jobs:
           FRONTEND="${{ needs.verify-frontend-deployment.result || 'skipped' }}"
           BACKEND="${{ needs.test-backend-deployment.result || 'skipped' }}"
           API="${{ needs.test-api-endpoints.result || 'skipped' }}"
+          E2E="${{ needs.cypress-test.result || 'skipped' }}"
 
           # CLI Output
           echo "🚀 Staging: $ENV_NAME v$VERSION"
@@ -360,18 +365,20 @@ jobs:
           echo "Frontend: $FRONTEND"
           echo "Backend: $BACKEND"
           echo "API Tests: $API"
+          echo "E2E Tests: $E2E"
           echo ""
 
           # GitHub Summary
           echo "# 🚀 Staging: $ENV_NAME $VERSION" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Frontend:** $FRONTEND | **Backend:** $BACKEND | **API Tests:** $API" >> $GITHUB_STEP_SUMMARY
+          echo "**Frontend:** $FRONTEND | **Backend:** $BACKEND | **API Tests:** $API" | **E2E:** $E2E" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
           # Simple Decision Logic
           if [[ "$FRONTEND" == "success" || "$FRONTEND" == "skipped" ]] &&
             [[ "$BACKEND" == "success" || "$BACKEND" == "skipped" ]] &&
-            [[ "$API" == "success" || "$API" == "skipped" ]]; then
+            [[ "$API" == "success" || "$API" == "skipped" ]] &&
+            [[ "$E2E" == "success" || "$E2E" == "skipped" ]]; then
 
             if [[ "$FRONTEND" == "success" || "$BACKEND" == "success" ]]; then
               echo "✅ Ready for production: https://test.dzresume.dev"
