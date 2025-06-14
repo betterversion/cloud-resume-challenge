@@ -3,21 +3,21 @@ name: Deploy to Staging
 
 on:
   push:
-    branches: ['feature**']
+    branches: ["feature**"]
     paths:
-      - 'frontend/hugo/**'
-      - 'infrastructure/terraform/application/**'
-      - '.github/workflows/deploy-staging.yml'
+      - "frontend/hugo/**"
+      - "infrastructure/terraform/application/**"
+      - ".github/workflows/deploy-staging.yml"
 
   workflow_dispatch:
     inputs:
       deploy_frontend:
-        description: 'Deploy frontend'
+        description: "Deploy frontend"
         required: false
         type: boolean
         default: true
       deploy_backend:
-        description: 'Deploy backend'
+        description: "Deploy backend"
         required: false
         type: boolean
         default: true
@@ -29,7 +29,7 @@ permissions:
 env:
   AWS_REGION: us-east-1
   AWS_ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}
-  HUGO_VERSION: 'latest'
+  HUGO_VERSION: "latest"
 
 jobs:
   determine-environment:
@@ -100,27 +100,27 @@ jobs:
           echo "📡 CloudFront test ID: $CF_TEST_ID"
 
   frontend-unit-testing:
-      name: 🧪 Frontend Unit Testing
-      runs-on: ubuntu-latest
-      needs: determine-environment
-      if: needs.determine-environment.outputs.frontend == 'true'
-      steps:
-        - name: Checkout
-          uses: actions/checkout@v4
+    name: 🧪 Frontend Unit Testing
+    runs-on: ubuntu-latest
+    needs: determine-environment
+    if: needs.determine-environment.outputs.frontend == 'true'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-        - name: Setup Node.js
-          uses: actions/setup-node@v4
-          with:
-            node-version: '20'
-            cache: 'npm'
-            cache-dependency-path: frontend/hugo/package-lock.json
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: frontend/hugo/package-lock.json
 
-        - name: Install dependencies and run unit tests
-          working-directory: frontend/hugo
-          run: |
-            npm ci
-            npm test
-            echo "✅ All frontend unit tests passed"
+      - name: Install dependencies and run unit tests
+        working-directory: frontend/hugo
+        run: |
+          npm ci
+          npm test
+          echo "✅ All frontend unit tests passed"
 
   build-deploy-frontend:
     name: 🎨 Build & Deploy Frontend
@@ -284,39 +284,36 @@ jobs:
           fi
 
   test-api-endpoints:
-      name: 🧪 API Validation
-      runs-on: ubuntu-latest
-      needs: [deploy-backend, test-backend-deployment, determine-environment]
-      if: needs.test-backend-deployment.result == 'success'
-      steps:
-        - name: Checkout
-          uses: actions/checkout@v4
+    name: 🧪 API Validation
+    runs-on: ubuntu-latest
+    needs: [deploy-backend, test-backend-deployment, determine-environment]
+    if: needs.test-backend-deployment.result == 'success'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-        - name: Test APIs
-          uses: SimonScholz/postman-newman-action@main
-          with:
-            collection: backend/tests/collections/api-tests.json
-            environment: backend/tests/environments/${{ needs.determine-environment.outputs.environment }}.json
-            reporters: 'cli'
-            bail: failure
-            timeoutRequest: 10000
+      - name: Test APIs
+        uses: SimonScholz/postman-newman-action@main
+        with:
+          collection: backend/tests/collections/api-tests.json
+          environment: backend/tests/environments/${{ needs.determine-environment.outputs.environment }}.json
+          reporters: "cli"
+          bail: failure
+          timeoutRequest: 10000
 
   cypress-test:
     name: 🧪 Cypress E2E Tests
     runs-on: ubuntu-latest
     needs:
       - build-deploy-frontend
-      - test-api-endpoints
-      - test-backend-deployment
       - verify-frontend-deployment
       - determine-environment
-    # Only run E2E tests if nothing failed and at least one deployment succeeded
+    # Run E2E if something changed AND frontend isn't broken
     if: >
+      always() &&
       needs.verify-frontend-deployment.result != 'failure' &&
-      needs.test-backend-deployment.result != 'failure' &&
-      needs.test-api-endpoints.result != 'failure' &&
-      (needs.verify-frontend-deployment.result == 'success' ||
-      needs.test-backend-deployment.result == 'success')
+      (needs.determine-environment.outputs.frontend == 'true' ||
+      needs.determine-environment.outputs.backend == 'true')
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -343,7 +340,6 @@ jobs:
           echo "🎯 Cypress E2E Test Results"
           echo "Status: ${{ job.status }}"
 
-
   summary:
     name: 📊 Deployment Summary
     runs-on: ubuntu-latest
@@ -354,55 +350,30 @@ jobs:
         run: |
           ENV_NAME="${{ needs.determine-environment.outputs.environment }}"
           VERSION="${{ needs.determine-environment.outputs.version }}"
+
+          # Simple status check
           FRONTEND="${{ needs.verify-frontend-deployment.result || 'skipped' }}"
           BACKEND="${{ needs.test-backend-deployment.result || 'skipped' }}"
           API="${{ needs.test-api-endpoints.result || 'skipped' }}"
           E2E="${{ needs.cypress-test.result || 'skipped' }}"
 
-          # CLI Output
           echo "🚀 Staging: $ENV_NAME v$VERSION"
-          echo ""
-          echo "Frontend: $FRONTEND"
-          echo "Backend: $BACKEND"
-          echo "API Tests: $API"
-          echo "E2E Tests: $E2E"
-          echo ""
+          echo "Frontend: $FRONTEND | Backend: $BACKEND | API: $API | E2E: $E2E"
 
-          # GitHub Summary
+          # GitHub Summary (simple)
           echo "# 🚀 Staging: $ENV_NAME $VERSION" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Frontend:** $FRONTEND | **Backend:** $BACKEND | **API:** $API | **E2E:** $E2E" >> $GITHUB_STEP_SUMMARY
-          #                                                                    ↑ FIXED: Removed extra pipe
-          echo "" >> $GITHUB_STEP_SUMMARY
 
-          # Check for failures and report details
-          FAILED_JOBS=""
-          [[ "$FRONTEND" == "failure" ]] && FAILED_JOBS="$FAILED_JOBS Frontend"
-          [[ "$BACKEND" == "failure" ]] && FAILED_JOBS="$FAILED_JOBS Backend"
-          [[ "$API" == "failure" ]] && FAILED_JOBS="$FAILED_JOBS API-Tests"
-          [[ "$E2E" == "failure" ]] && FAILED_JOBS="$FAILED_JOBS E2E-Tests"
-
-          # Decision Logic with better error reporting
-          if [[ "$FRONTEND" == "success" || "$FRONTEND" == "skipped" ]] &&
-            [[ "$BACKEND" == "success" || "$BACKEND" == "skipped" ]] &&
-            [[ "$API" == "success" || "$API" == "skipped" ]] &&
-            [[ "$E2E" == "success" || "$E2E" == "skipped" ]]; then
-
-            if [[ "$FRONTEND" == "success" || "$BACKEND" == "success" ]]; then
-              echo "✅ Ready for production: https://test.dzresume.dev"
-              echo "## ✅ Ready for Production" >> $GITHUB_STEP_SUMMARY
-              echo "**Staging:** https://test.dzresume.dev" >> $GITHUB_STEP_SUMMARY
-            else
-              echo "⚠️  No deployments executed"
-              echo "## ⚠️ No Changes Deployed" >> $GITHUB_STEP_SUMMARY
-            fi
-          else
-            echo "❌ Fix issues before promotion"
-            echo "Failed jobs:$FAILED_JOBS"
-            echo ""
-            echo "## ❌ Issues Found - Not Ready" >> $GITHUB_STEP_SUMMARY
-            echo "**Failed Jobs:**$FAILED_JOBS" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "**Action Required:** Fix failing tests before production promotion" >> $GITHUB_STEP_SUMMARY
+          # Simple decision: Any failure = not ready, any success = ready
+          if [[ "$FRONTEND $BACKEND $API $E2E" == *"failure"* ]]; then
+            echo "❌ Not ready - check failed jobs"
+            echo "## ❌ Not Ready" >> $GITHUB_STEP_SUMMARY
             exit 1
+          elif [[ "$FRONTEND $BACKEND" == *"success"* ]]; then
+            echo "✅ Ready: https://test.dzresume.dev"
+            echo "## ✅ Ready for Production" >> $GITHUB_STEP_SUMMARY
+            echo "**Staging:** https://test.dzresume.dev" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ No changes deployed"
+            echo "## ⚠️ No Changes" >> $GITHUB_STEP_SUMMARY
           fi
