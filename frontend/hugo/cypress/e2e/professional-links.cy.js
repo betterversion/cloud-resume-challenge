@@ -5,7 +5,7 @@ describe("Professional Links Validation", () => {
   });
 
   it("has working GitHub profile link", () => {
-    cy.get('a[href*="github.com/betterversion"]')
+    cy.get('a[href*="github.com/betterversion"][data-original-title="GitHub"]')
       .should("be.visible")
       .and("have.attr", "href", "https://github.com/betterversion")
       .and("have.attr", "rel", "me");
@@ -80,7 +80,7 @@ describe("Professional Links Validation", () => {
 
   it("professional links have security attributes", () => {
     const professionalLinks = [
-      'a[href*="github.com/betterversion"]',
+      'a[href*="github.com/betterversion"][data-original-title="GitHub"]',
       'a[href*="credly.com"]',
     ];
 
