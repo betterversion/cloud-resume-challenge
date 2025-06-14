@@ -2,9 +2,10 @@
 
 # 🚀 Cloud Resume Challenge - Enterprise Implementation
 
-![Deploy to Staging](https://github.com/betterversion/cloud-resume-challenge/actions/workflows/deploy-staging.yml/badge.svg)
-![Promote to Production](https://github.com/betterversion/cloud-resume-challenge/actions/workflows/promote-production.yml/badge.svg)
-![Website Status](https://img.shields.io/website?url=https%3A//dzresume.dev)
+[![Deploy to Staging](https://github.com/betterversion/cloud-resume-challenge/actions/workflows/deploy-staging.yml/badge.svg)](https://github.com/betterversion/cloud-resume-challenge/actions/workflows/deploy-staging.yml)
+[![Promote to Production](https://github.com/betterversion/cloud-resume-challenge/actions/workflows/promote-production.yml/badge.svg)](https://github.com/betterversion/cloud-resume-challenge/actions/workflows/promote-production.yml)
+[![Website Status](https://img.shields.io/website?url=https%3A//dzresume.dev)](https://dzresume.dev)
+
 
 ## 🏆 From Zero to Cloud Engineer in 20 Days
 
