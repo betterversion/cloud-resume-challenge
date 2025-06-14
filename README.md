@@ -2,6 +2,10 @@
 
 # 🚀 Cloud Resume Challenge - Enterprise Implementation
 
+![Deploy to Staging](https://github.com/betterversion/cloud-resume-challenge/actions/workflows/deploy-staging.yml/badge.svg)
+![Promote to Production](https://github.com/betterversion/cloud-resume-challenge/actions/workflows/promote-production.yml/badge.svg)
+![Website Status](https://img.shields.io/website?url=https%3A//dzresume.dev)
+
 ## 🏆 From Zero to Cloud Engineer in 20 Days
 
 **What started as a simple resume website became an enterprise-grade cloud platform.** This implementation demonstrates not just AWS knowledge, but the ability to architect, build, and operate production systems that Fortune 500 companies actually use. Every decision prioritizes real-world patterns over tutorial shortcuts.
@@ -153,7 +157,7 @@ npm run deploy
 |**Quality**|17-19|Comprehensive testing pyramid, monitoring|Production confidence|
 |**Documentation**|20|Professional documentation suite, visual architecture|Interview-ready presentation|
 
-**[→ Read the Full 19-Day Technical Journey](./docs/progress.md)**
+**[→ Read the Full 20-Day Technical Journey](./docs/progress.md)**
 
 ---
 
