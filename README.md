@@ -2,8 +2,14 @@
 
 # 🚀 Cloud Resume Challenge - Enterprise Implementation
 
+<!-- Status badges -->
 [![Deploy to Staging](https://github.com/betterversion/cloud-resume-challenge/actions/workflows/deploy-staging.yml/badge.svg)](https://github.com/betterversion/cloud-resume-challenge/actions/workflows/deploy-staging.yml)
 [![Promote to Production](https://github.com/betterversion/cloud-resume-challenge/actions/workflows/promote-production.yml/badge.svg)](https://github.com/betterversion/cloud-resume-challenge/actions/workflows/promote-production.yml)
+
+<!-- Version badge -->
+[![Latest Release](https://img.shields.io/github/v/release/betterversion/cloud-resume-challenge?label=production)](https://github.com/betterversion/cloud-resume-challenge/releases)
+
+<!-- Site status -->
 [![Website Status](https://img.shields.io/website?url=https%3A//dzresume.dev)](https://dzresume.dev)
 
 

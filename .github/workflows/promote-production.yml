@@ -241,22 +241,42 @@ jobs:
           terraform apply -var="active_environment=${{ needs.analyze-and-plan.outputs.current_active }}" -auto-approve
 
           echo "✅ Rollback complete"
+summary:
+  name: 📊 Summary & Release
+  runs-on: ubuntu-latest
+  needs: [analyze-and-plan, switch-traffic, verify-production]
+  if: always()
+  permissions:
+    contents: write
+  steps:
+    - name: Report results
+      run: |
+        echo "🚀 PROMOTION RESULTS"
+        echo "Version: ${{ needs.analyze-and-plan.outputs.version }}"
+        echo "Switch: ${{ needs.switch-traffic.result == 'success' && '✅' || '❌' }}"
+        echo "Verify: ${{ needs.verify-production.result == 'success' && '✅' || '❌' }}"
+        echo ""
+        if [[ "${{ needs.verify-production.result }}" == "success" ]]; then
+          echo "🎉 Production: https://dzresume.dev"
+        else
+          echo "❌ Promotion failed - check logs"
+        fi
 
-  summary:
-    name: 📊 Summary
-    runs-on: ubuntu-latest
-    needs: [analyze-and-plan, switch-traffic, verify-production]
-    if: always()
-    steps:
-      - name: Report results
-        run: |
-          echo "🚀 PROMOTION RESULTS"
-          echo "Version: ${{ needs.analyze-and-plan.outputs.version }}"
-          echo "Switch: ${{ needs.switch-traffic.result == 'success' && '✅' || '❌' }}"
-          echo "Verify: ${{ needs.verify-production.result == 'success' && '✅' || '❌' }}"
-          echo ""
-          if [[ "${{ needs.verify-production.result }}" == "success" ]]; then
-            echo "🎉 Production: https://dzresume.dev"
-          else
-            echo "❌ Promotion failed - check logs"
-          fi
+        # GitHub Step Summary
+        echo "# 🚀 Production ${{ needs.analyze-and-plan.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+        echo "**Switch:** ${{ needs.switch-traffic.result == 'success' && '✅' || '❌' }} | **Verify:** ${{ needs.verify-production.result == 'success' && '✅' || '❌' }}" >> $GITHUB_STEP_SUMMARY
+        if [[ "${{ needs.verify-production.result }}" == "success" ]]; then
+          echo "## ✅ Live: https://dzresume.dev" >> $GITHUB_STEP_SUMMARY
+        fi
+
+    - name: 📦 Create Release
+      if: needs.verify-production.result == 'success'
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ needs.analyze-and-plan.outputs.version }}
+        release_name: Production ${{ needs.analyze-and-plan.outputs.version }}
+        body: |
+          🚀 Production ${{ needs.analyze-and-plan.outputs.version }}
+          **Live:** https://dzresume.dev
