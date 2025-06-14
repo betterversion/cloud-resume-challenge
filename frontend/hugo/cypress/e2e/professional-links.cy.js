@@ -58,11 +58,9 @@ describe("Professional Links Validation", () => {
       .and("have.attr", "rel", "me");
 
     // Contact section LinkedIn
-    cy.get('a[href*="linkedin.com/in/YOUR-LINKEDIN"]')
+    cy.get('a[href*="linkedin.com/in/dmitriy-zhernoviy"]')
       .should("be.visible")
       .and("have.attr", "rel", "me");
-
-    cy.log("⚠️ LinkedIn URLs are placeholders - update needed for production");
   });
 
   it("contact section displays all methods", () => {

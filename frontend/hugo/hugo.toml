@@ -68,7 +68,7 @@ api_url_green = "https://js2yf050o4.execute-api.us-east-1.amazonaws.com/green"
 
 [[params.handles]]
 name = "LinkedIn"
-link = "#"
+link = "https://www.linkedin.com/in/dmitriy-zhernoviy"
 icon = "linkedin"
 
 [[params.handles]]
